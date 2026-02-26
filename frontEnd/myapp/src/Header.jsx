@@ -1,6 +1,9 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+const api = import.meta.env.API_URL;
+
+
 
 const Header = () => {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -8,6 +11,7 @@ const Header = () => {
   const [viewTheme, setViewTheme] = useState("");
   // const [rolle, setRolle] = useState("");
   const navigate = useNavigate();
+  // console.log(api);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -21,16 +25,16 @@ const Header = () => {
 
    useEffect(() => {
     
-    document.documentElement.classList.toggle("dark", theme === "dark");
+    // document.documentElement.classList.toggle("dark", theme === "dark");
     const fetchTheme = async () => {
        const token = localStorage.getItem("token");
-       if (!token){
-        alert("Please login is first");
-        navigate("/login");
-        return;
-       }
+      //  if (!token){
+      //   alert("Please login is first");
+      //   navigate("/login");
+      //   return;
+      //  }
       const res = await axios.get(
-        "http://localhost:4040/users/theme",
+        `http://localhost:5050/user/theme`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       
@@ -54,7 +58,7 @@ const Header = () => {
                 
 
    await axios.post(
-  "http://localhost:4040/users/updatetheme",
+  `http://localhost:5050/user/updatetheme`,
   { theme: newTheme },
   {
     headers: {
@@ -67,7 +71,7 @@ const Header = () => {
     } catch (err) {
       console.error("Theme update failed", err);
     }
-  };
+  }
 
   return (
     <>
