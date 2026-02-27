@@ -18,6 +18,10 @@ app.use(cors());
 
 const userRoute=require("./Router/userRouter");
 app.use("/user",userRoute);
+const locationRoute=require("./Router/location");
+app.use("/location",locationRoute);
+const policeRoute=require("./Router/policeRouter");
+app.use("/police",policeRoute);
 
 
 app.listen(port,()=>console.log("server is running on port",port))

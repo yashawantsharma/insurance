@@ -8,6 +8,8 @@ import Sidebar from './Sidebar'
 import Profile from './Profile'
 import Login from './Login'
 import Reset from './Reset'
+import LocationSelector from './LocationSelecto'
+import Police from './Police'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -21,6 +23,8 @@ function App() {
       <Route path='/profile' element={<Profile/>}/>
       <Route path='/login' element={<Login/>}/>
       <Route path='/reset' element={<Reset/>}/>
+      <Route path='/location' element={<LocationSelector/>}/>
+       <Route path='/police' element={<Police/>}/>
     
     </Routes>
     </BrowserRouter>

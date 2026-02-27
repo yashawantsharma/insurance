@@ -32,18 +32,18 @@ const Sidebar = () => {
                     📖 My Courses
                 </button> */}
                  <button
-                    onClick={() => handleNavigate("/allbatch")}
+                    onClick={() => handleNavigate("/location")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
-                    📖 Batch
+                    📖 Location
                 </button>
 
 
                 <button
-                    onClick={() => handleNavigate("/alltutors")}
+                    onClick={() => handleNavigate("/police")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
-                    👨‍🏫Tutors
+                    Police
                 </button> 
                 <button
                     onClick={() => handleNavigate("/fees")}
