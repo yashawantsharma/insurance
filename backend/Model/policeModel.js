@@ -1,4 +1,4 @@
-const mongoose =require("mongoose");
+const mongoose = require("mongoose");
 
 const policeSchema = new mongoose.Schema(
     {
@@ -6,6 +6,12 @@ const policeSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
+        },
+        installmentDuration: {
+            type: String,
+        },
+        installmentAmount: {
+            type: Number,
         },
         role: {
             type: String,

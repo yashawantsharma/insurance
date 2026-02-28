@@ -10,6 +10,7 @@ import Login from './Login'
 import Reset from './Reset'
 import LocationSelector from './LocationSelecto'
 import Police from './Police'
+import Agent from './Agent'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -25,6 +26,7 @@ function App() {
       <Route path='/reset' element={<Reset/>}/>
       <Route path='/location' element={<LocationSelector/>}/>
        <Route path='/police' element={<Police/>}/>
+       <Route path='/agent' element={<Agent/>}/>
     
     </Routes>
     </BrowserRouter>

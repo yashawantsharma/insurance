@@ -13,6 +13,8 @@ mongoose.connect(process.env.DATABASE_URL)
     .then(() => console.log("connection is successfully"))
     .catch((err) => console.log("database is not connected", err))
 
+const fileUpload = require("express-fileupload");
+app.use(fileUpload());
 app.use(express.json());
 app.use(cors());
 
@@ -22,6 +24,8 @@ const locationRoute=require("./Router/location");
 app.use("/location",locationRoute);
 const policeRoute=require("./Router/policeRouter");
 app.use("/police",policeRoute);
+const agentRoute=require("./Router/agentRoute");
+app.use("/Agent",agentRoute);
 
 
 app.listen(port,()=>console.log("server is running on port",port))
