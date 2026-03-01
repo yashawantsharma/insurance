@@ -236,21 +236,6 @@ const Police = () => {
                                             <MdVisibility size={20} />
                                         </button>
 
-                                        {/* <button
-                        onClick={() => handleToggle(x._id)}
-                        className={`p-1 rounded ${
-                          x.status === "active"
-                            ? "text-green-600"
-                            : "text-gray-500"
-                        }`}
-                        title={x.status === "active" ? "Deactivate" : "Activate"}
-                      >
-                        {x.status === "active"
-                          ? <MdCheckCircle size={20} />
-                          : <MdCancel size={20} />
-                        }
-                      </button> */}
-
                                         <button
                                             onClick={() => {
                                                 setEditData(item);
@@ -457,7 +442,7 @@ const Police = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setFormOpen(false)}
+                                onClick={() => setIsOpen(false)}
                                 className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200"
                             >
                                 Cancel

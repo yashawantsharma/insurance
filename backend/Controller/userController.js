@@ -84,7 +84,7 @@ exports.register = async (req, res) => {
 exports.findAll = async (req, res) => {
     try {
         const users = await user.find();
-        res.status(200).json({ message: "All users", users })
+        res.status(200).json(users)
     }
     catch (error) {
         res.status(500).json({ message: "Server error", error: error.message })

@@ -53,10 +53,10 @@ const Sidebar = () => {
                 </button>
 
                 <button
-                    onClick={() => handleNavigate("/timetable")}
+                    onClick={() => handleNavigate("/user")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
-                    📅 Time Table
+                    User List
                 </button>
 
                 {/* <button
