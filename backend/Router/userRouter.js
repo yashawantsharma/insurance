@@ -8,7 +8,7 @@ const auth = require("../Middleware/auth");
 route.post("/", userController.register);
 route.get("/findall",userController.findAll);
 route.get("/findone/:id",userController.findOne);
-route.put("/update/:id",auth,userController.update);
+route.put("/update/:id",userController.update);
 route.delete("/delete/:id",userController.delete);
 route.post("/login",userController.login);
 route.post("/forgot",userController.forgot);

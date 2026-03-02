@@ -31,3 +31,25 @@ exports.getCities = (req, res) => {
         res.status(500).json({ message: "Error fetching cities", error });
     }
 };
+
+
+
+
+// exports.addcountries=async(req,res)=>{
+// try {
+//     const {countryname}=req.body
+//     console.log(countryname)
+//     if(!countryname){
+//         res.states(400).json({message:"country not found"})
+//     }
+//     const existingcountry=await countryModel.findOne({countryname})
+//     if(!existingcountry){
+//          res.states(400).json({message:"country are alredy existing"})
+//     }
+//     const newcountry=new countryModel({countryModel})
+//      res.states(200).json(newcountry)
+// } catch (error) {
+//     res.status(500).json({ message: "Server error", error: error.message });
+    
+// }
+// }

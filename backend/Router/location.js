@@ -8,4 +8,6 @@ route.get("/states/:countryCode", locationController.getStates);
 route.get("/cities/:countryCode/:stateCode", locationController.getCities);   
 
 
+
+
 module.exports = route;

@@ -8,14 +8,26 @@ const User = () => {
     const [view, setView] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
     const [showForm, setShowForm] = useState(false)
-    const [input,setInput]=useState({
-        name:"",
-        email:"",
-        phone:"",
-        password:"",
-        role:"",
-        gender:""
+    const [isOpen, setIsOpen] = useState(false);
+    const [search, setSearch] = useState("");
+    const [editData, setEditData] = useState(null);
+    const [input, setInput] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        role: "",
+        gender: ""
     })
+
+    const [editinput, setEditInput] = useState({
+        name: "",
+        email: "",
+        phone: "",
+        password: "",
+        role: "",
+        gender: ""
+    });
 
     useEffect(() => {
         fatchdata()
@@ -81,6 +93,47 @@ const User = () => {
             console.error("Error submitting form:", error);
         }
     }
+
+
+    const handledit = async (x) => {
+        x.preventDefault();
+        try {
+            await axios.put(`http://localhost:5050/user/update/${editData._id}`, editinput)
+            alert("Data Update Successfully")
+            fatchdata()
+            setIsOpen(false)
+        } catch (error) {
+
+        }
+    }
+
+    const handleDelete=async(x)=>{
+        try {
+            await axios.delete(`http://localhost:5050/user/delete/${x}`)
+            alert("Data Delete Successfully")
+            fatchdata()
+        } catch (error) {
+            
+        }
+    }
+
+    const editdatashow = (item) => {
+  setEditInput({
+    name: item.name || "",
+    email: item.email || "",
+    password: "",
+    role: item.role || "",
+    gender: item.gender || "",
+    phone: item.phone || "",
+  });
+
+  setIsOpen(true);
+};
+
+ const filteredData = filtredata.filter((item) =>
+        item.name.toLowerCase().includes(search.toLowerCase())
+    );
+
     return (
         <div
             className={`ml-64 mt-14 p-6 min-h-screen ${theme === "dark"
@@ -100,6 +153,14 @@ const User = () => {
                 </button>
             </div>
 
+             <input
+                type="text"
+                placeholder="Search by name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="border px-3 py-2 rounded-md mb-4 w-100  focus:ring-2 focus:ring-blue-500"
+            />
+
             <div className="overflow-x-auto  dark:bg-gray-800 rounded-xl shadow">
                 <table className="min-w-full text-sm text-left">
                     <thead className=" dark:bg-gray-700">
@@ -114,8 +175,8 @@ const User = () => {
                     </thead>
 
                     <tbody>
-                        {filtredata.length > 0 ? (
-                            filtredata.map((x) => (
+                        {filteredData.length > 0 ? (
+                            filteredData.map((x) => (
                                 <tr
                                     key={x._id}
                                     className="border-b  dark:hover:bg-gray-700 transition"
@@ -140,10 +201,11 @@ const User = () => {
                                             </button>
 
                                             <button
-                                                // onClick={() => {
-                                                //     setEditData(item);
-                                                //     setIsOpen(true);
-                                                // }}
+                                                onClick={() => {
+                                                    editdatashow(x)
+                                                    setEditData(x);
+                                                    setIsOpen(true);
+                                                }}
                                                 className="text-yellow-500 hover:text-yellow-600"
                                                 title="Edit"
                                             >
@@ -151,7 +213,7 @@ const User = () => {
                                             </button>
 
                                             <button
-                                                // onClick={() => handleDelete(item._id)}
+                                                onClick={() => handleDelete(x._id)}
                                                 className="text-red-600 hover:text-red-800"
                                                 title="Delete"
                                             >
@@ -219,6 +281,126 @@ const User = () => {
                 )}
             </div>
 
+            {isOpen && editinput && (
+                <div className={`fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+                    <form onSubmit={handledit} className=" rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md">
+                        <h2 className="text-2xl font-bold mb-6">Edit Record</h2>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editinput.name}
+                                    onChange={(e) => setEditInput({ ...editinput, name: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    email :
+                                </label>
+                                <input
+                                    type="email"
+                                    value={editinput.email}
+                                    onChange={(e) => setEditInput({ ...editinput, email: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+
+                            <div>
+                                <label className=" text-sm font-medium mb-2">
+                                    password
+                                </label>
+                                <input
+                                    type="number"
+                                    value={editinput.password}
+                                    onChange={(e) => setEditInput({ ...editinput, password: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+
+
+
+
+
+
+                            <div>
+                                <label className=" text-sm font-medium mb-2">
+                                    role
+                                </label>
+                                <select
+                                    value={editinput.role}
+                                    name='role'
+                                    onChange={(e) => setEditInput({ ...editinput, role: e.target.value })}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                    required
+                                >
+                                    <option value="">Select ...</option>
+                                    <option value="user">user</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className=" text-sm font-medium mb-2">
+                                    gender
+                                </label>
+                                <select
+                                    value={editinput.gender}
+                                    name='role'
+                                    onChange={(e) => setEditInput({ ...editinput, gender: e.target.value })}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                    required
+                                >
+                                    <option value="">Select gender</option>
+                                    <option value="male">male</option>
+                                    <option value="female">female</option>
+                                    <option value="outher">outher</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label className=" text-sm font-medium mb-2">
+                                    phone
+                                </label>
+                                <input
+                                    type="number"
+                                    value={editinput.phone}
+                                    onChange={(e) => setEditInput({ ...editinput, phone: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                type="submit"
+                                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+                            >
+                                Submit
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsOpen(false)}
+                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            )}
+
 
             {showForm && (
                 <div className={`fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
@@ -252,8 +434,8 @@ const User = () => {
                                 />
                             </div>
 
-                           
-                             <div>
+
+                            <div>
                                 <label className=" text-sm font-medium mb-2">
                                     password
                                 </label>
@@ -265,10 +447,10 @@ const User = () => {
                                     required
                                 />
                             </div>
-                          
 
 
-        
+
+
 
 
 
@@ -288,7 +470,7 @@ const User = () => {
                                 </select>
                             </div>
 
-                              <div>
+                            <div>
                                 <label className=" text-sm font-medium mb-2">
                                     gender
                                 </label>

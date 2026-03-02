@@ -1,12 +1,11 @@
 
-import mongoose from "mongoose";
+const mongoose =require( "mongoose");
 
 const countrySchema = new mongoose.Schema({
-  name: {
+  countryname: {
     type: String,
     required: true,
-    unique: true
   }
 }, { timestamps: true });
 
-export default mongoose.model("Country", countrySchema);
+module.exports = mongoose.model("Country", countrySchema);

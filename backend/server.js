@@ -26,6 +26,12 @@ const policeRoute=require("./Router/policeRouter");
 app.use("/police",policeRoute);
 const agentRoute=require("./Router/agentRoute");
 app.use("/Agent",agentRoute);
+const branchRoute=require("./Router/branchRoute");
+app.use("/branch",branchRoute);
+const countryRoute=require("./Router/countryRoute");
+app.use("/Country",countryRoute);
+const stateRoute=require("./Router/stateRoute");
+app.use("/State",stateRoute);
 
 
 app.listen(port,()=>console.log("server is running on port",port))
