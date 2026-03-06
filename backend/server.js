@@ -32,6 +32,8 @@ const countryRoute=require("./Router/countryRoute");
 app.use("/Country",countryRoute);
 const stateRoute=require("./Router/stateRoute");
 app.use("/State",stateRoute);
+const districtRoute=require("./Router/districtRoute");
+app.use("/District",districtRoute);
 
 
 app.listen(port,()=>console.log("server is running on port",port))

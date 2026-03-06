@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = () => {
+const AgentSidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -16,7 +16,7 @@ const Sidebar = () => {
 
             <div className="flex flex-col p-4 space-y-2">
                 <button
-                    onClick={() => handleNavigate("/")}
+                    onClick={() => handleNavigate("/agentdashboard")}
                     className={`text-left px-4 py-3 rounded-lg font-semibold transitio
                             ? "bg-indigo-600 text-white"
                             : "hover:bg-gray-700 text-gray-300"
@@ -90,4 +90,4 @@ const Sidebar = () => {
     );
 };
 
-export default Sidebar;
+export default AgentSidebar;

@@ -51,8 +51,49 @@ exports.addAgent = async (req, res) => {
             joiningDate,
             experienceYears,
         });
-        // console.log(newAgent);
         await newAgent.save();
+        
+        console.log(newAgent);
+        
+         const transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: {
+                        user: process.env.SENT_EMAIL,
+                        pass: process.env.SENT_PASS,
+                    },
+                });
+        
+        
+                const info = await transporter.sendMail({
+                    from: process.env.SENT_EMAIL,
+                    to: email,
+                    subject: "Account Created successfully",
+                    subject: "Account Created",
+                    html: `
+            <p>Hello <b>${fullName}</b>,</p>
+        
+            <p>
+              Your account has been created with the following details:
+            </p>
+        
+            <p>
+              <b>Email:</b> ${email}<br/>
+              <b>Phone:</b> ${phone}<br/>
+              <b>Password:</b> ${password}
+            </p>
+        
+            <p>
+              Please change your password after login.
+            </p>
+        
+            <p>
+              Thanks,<br/>
+            </p>
+          `,
+        
+                });
+        // console.log(newAgent);
+        
         const userdata=new user({
             name:fullName,
             email,

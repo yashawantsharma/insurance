@@ -21,7 +21,7 @@ function generatePassword(length = 4) {
 exports.register = async (req, res) => {
     try {
         console.log(req.body);
-        const { name, email, phone, gender } = req.body;
+        const { name, email, phone, gender,role } = req.body;
             if (!(name && email && phone && gender)) {
             return res.status(400).json({ message: "All input are required" });
         }
@@ -32,7 +32,7 @@ exports.register = async (req, res) => {
         password = generatePassword();
          const salt = bcrypt.genSaltSync(10)
         const hash = bcrypt.hashSync(password, salt);
-        const data = { name, email, phone, password: hash, gender };
+        const data = { name, email, phone, password: hash, gender,role };
         const newUser = new user(data);
         await newUser.save();
          const transporter = nodemailer.createTransport({

@@ -43,14 +43,14 @@ const Login = ({ switchToSignup }) => {
                 localStorage.setItem("userid", response.data.user.id);
 
                 alert("Login successfully");
-                if (response.data.user.role === "student") {
-                    navigate("/studentdashboard");
+                if (response.data.user.role === "agent") {
+                    navigate("/agentdashboard");
                 }
                 else if (response.data.user.role === "admin") {
                     navigate("/");
                 }
-                else if (response.data.user.role === "HR" || response.data.user.role === "employee") {
-                    navigate("/hr");
+                else if (response.data.user.role === "user" || response.data.user.role === "employee") {
+                    navigate("/userdashboard");
                 }
 
             } catch (error) {

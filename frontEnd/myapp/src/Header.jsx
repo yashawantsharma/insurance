@@ -11,7 +11,6 @@ const Header = () => {
   const [viewTheme, setViewTheme] = useState("");
   // const [rolle, setRolle] = useState("");
   const navigate = useNavigate();
-  // console.log(api);
 
   const handleNavigate = (path) => {
     navigate(path);
@@ -25,14 +24,13 @@ const Header = () => {
 
    useEffect(() => {
     
-    // document.documentElement.classList.toggle("dark", theme === "dark");
     const fetchTheme = async () => {
        const token = localStorage.getItem("token");
-      //  if (!token){
-      //   alert("Please login is first");
-      //   navigate("/login");
-      //   return;
-      //  }
+       if (!token){
+        alert("Please login is first");
+        navigate("/login");
+        return;
+       }
       const res = await axios.get(
         `http://localhost:5050/user/theme`,
         { headers: { Authorization: `Bearer ${token}` } }
@@ -73,11 +71,13 @@ const Header = () => {
     }
   }
 
+  
+
   return (
     <>
   
       <div className={`fixed top-0 border left-0 w-full h-14  flex items-center justify-between px-4 shadow z-50 ${viewTheme=== "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
-        <h2 className="font-semibold">{role === "admin" ? "Admin Dashboard" : role === "student" ? "Student Dashboard" : "HR Dashboard"}</h2>
+        <h2 className="font-semibold">{role === "admin" ? "Admin Dashboard" : role === "agent" ? "Agent Dashboard" : "User Dashboard"}</h2>
 
         
 

@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from "react-router-dom";
 
-const Sidebar = () => {
+const UserSidebar = () => {
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -16,7 +16,7 @@ const Sidebar = () => {
 
             <div className="flex flex-col p-4 space-y-2">
                 <button
-                    onClick={() => handleNavigate("/")}
+                    onClick={() => handleNavigate("/userdashboard")}
                     className={`text-left px-4 py-3 rounded-lg font-semibold transitio
                             ? "bg-indigo-600 text-white"
                             : "hover:bg-gray-700 text-gray-300"
@@ -31,33 +31,23 @@ const Sidebar = () => {
                 >
                     📖 My Courses
                 </button> */}
-                 <button
+                 {/* <button
                     onClick={() => handleNavigate("/location")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
                     📖 Location
-                </button>
+                </button> */}
 
 
                 <button
-                    onClick={() => handleNavigate("/police")}
+                    onClick={() => handleNavigate("/userpolice")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
                     Police
                 </button> 
-                <button
-                    onClick={() => handleNavigate("/agent")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                Agent
-                </button>
+                
 
-                <button
-                    onClick={() => handleNavigate("/user")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                    User List
-                </button>
+               
 
                 {/* <button
                     onClick={() => handleNavigate("/studentdashboard")}
@@ -73,12 +63,12 @@ const Sidebar = () => {
                     🎓 Results
                 </button> */}
 
-                <button
+                {/* <button
                     onClick={() => handleNavigate("/allbranch")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
                     All Branch
-                </button>
+                </button> */}
             </div>
 
             <div className="px-4 py-4 border-t border-gray-700 mt-auto">
@@ -90,4 +80,4 @@ const Sidebar = () => {
     );
 };
 
-export default Sidebar;
+export default UserSidebar;

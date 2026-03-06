@@ -1,5 +1,6 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Reset = () => {
   const[theme,setTheme]=useState("")
@@ -9,6 +10,7 @@ const Reset = () => {
         newpassword:"",
         confrompassword:""
     })
+    const navigate=useNavigate()
 
     useEffect(()=>{
       const token = localStorage.getItem("token")
@@ -37,6 +39,7 @@ const Reset = () => {
         }
         const result=await axios.post("http://localhost:5050/user/reset",data)
         alert("successfully")
+        navigate("/profile")
     }
   return (
     <div className={`min-h-screen mt-14 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>

@@ -16,8 +16,12 @@ const branchSchema = new mongoose.Schema(
 
     district: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "District",   
-      required: true,
+      ref: "District",
+      // required: true,
+    },
+    totalAgents: {
+      type: Number,
+      default: 0,
     },
 
     address: {

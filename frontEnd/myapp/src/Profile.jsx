@@ -17,7 +17,7 @@ export default function Profile() {
   });
 
   const id = localStorage.getItem("userid");
-  
+
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -40,13 +40,13 @@ export default function Profile() {
   }, [userdata]);
 
   const fatchTheme = async () => {
-    try {      
+    try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
         `http://localhost:5050/user/theme/`,
         {
           headers: {
-            Authorization: `Bearer ${token}`, 
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -54,7 +54,7 @@ export default function Profile() {
       // console.log(res.data);
     } catch (error) {
       console.error("Error fetching theme data:", error);
-    } 
+    }
   }
 
   const fetchUser = async () => {
@@ -70,7 +70,7 @@ export default function Profile() {
       );
       setUserdata(res.data);
       // console.log(res.data);
-      
+
     } catch (error) {
       console.error("Error fetching user data:", error);
     } finally {
@@ -123,8 +123,21 @@ export default function Profile() {
     );
   }
 
+  const nav = async () => {
+    const role = localStorage.getItem("role")
+    if (role === "agent") {
+      navigate("/agentdashboard");
+    }
+    else if (role === "admin") {
+      navigate("/");
+    }
+    else if (role === "user") {
+      navigate("/userdashboard");
+    }
+  }
+
   return (
-    <div className={`min-h-screen  flex items-center justify-center px-4 py-8 ${theme=== "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
+    <div className={`min-h-screen  flex items-center justify-center px-4 py-8 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-white text-black"}`}>
       <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl overflow-hidden">
         <div className="relative h-32 bg-gradient-to-r from-indigo-500 to-purple-600">
           <div className="absolute -bottom-16 left-1/2 transform -translate-x-1/2">
@@ -177,7 +190,7 @@ export default function Profile() {
             </button>
 
             <button
-              onClick={() => navigate("/")}
+              onClick={() => nav()}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-lg transition bg-gray-700 text-white hover:bg-gray-800"
             >
               <MdHome size={18} />
@@ -216,7 +229,7 @@ export default function Profile() {
                 <input
                   type="text"
                   value={updatedata.name}
-                  onChange={(e) => setUpdateData({...updatedata, name: e.target.value})}
+                  onChange={(e) => setUpdateData({ ...updatedata, name: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   placeholder="Enter your name"
                   required
@@ -230,7 +243,7 @@ export default function Profile() {
                 <input
                   type="email"
                   value={updatedata.email}
-                  onChange={(e) => setUpdateData({...updatedata, email: e.target.value})}
+                  onChange={(e) => setUpdateData({ ...updatedata, email: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   placeholder="Enter your email"
                   required
@@ -244,7 +257,7 @@ export default function Profile() {
                 <input
                   type="text"
                   value={updatedata.phone}
-                  onChange={(e) => setUpdateData({...updatedata, phone: e.target.value})}
+                  onChange={(e) => setUpdateData({ ...updatedata, phone: e.target.value })}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:outline-none"
                   placeholder="Enter your phone number"
                 />

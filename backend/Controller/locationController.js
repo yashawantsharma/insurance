@@ -53,3 +53,48 @@ exports.getCities = (req, res) => {
     
 // }
 // }
+
+
+
+
+
+
+exports.getallCountries = async (req, res) => {
+  try {
+    const countries = await countryModel.find();
+    res.status(200).json(countries);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get states by countryId
+exports.getStatesByCountry = async (req, res) => {
+  try {
+    // const { countryId } = req.params;
+
+    const states = await stateModel.find();
+    res.status(200).json(states);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// Get cities by stateId
+exports.getCitiesByState = async (req, res) => {
+  try {
+    // const { stateId } = req.params;
+
+    const cities = await districtModel.find();
+    res.status(200).json(cities);
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+
+
+
+
