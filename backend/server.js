@@ -34,6 +34,8 @@ const stateRoute=require("./Router/stateRoute");
 app.use("/State",stateRoute);
 const districtRoute=require("./Router/districtRoute");
 app.use("/District",districtRoute);
+const customerPolicyRoutes = require("./Router/customerPolicy");
+app.use("/CustomerPolicy", customerPolicyRoutes);
 
 
 app.listen(port,()=>console.log("server is running on port",port))

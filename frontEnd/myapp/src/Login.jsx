@@ -25,7 +25,7 @@ const Login = ({ switchToSignup }) => {
         if (!loginInput.password) {
             validationErrors.password = "password is required";
         }
-        console.log(loginInput);
+        // console.log(loginInput);
         
 
         setError(validationErrors);
@@ -55,7 +55,7 @@ const Login = ({ switchToSignup }) => {
 
             } catch (error) {
                 alert("Invalid credentials");
-                console.error(error);
+                // alert(error.response?.data);
             }
         }
     };

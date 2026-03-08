@@ -16,12 +16,22 @@ const LocationSelector = () => {
     branchCode: "",
     address: "",
   })
+  const [editinput, setEditInput] = useState({
+    branchName: "",
+    branchCode: "",
+    address: "",
+  })
+
 
 
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedState, setSelectedState] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("");
   const [allBranch, setAllBranch] = useState([])
+  const [view, setView] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+    const [editData, setEditData] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -152,7 +162,41 @@ const LocationSelector = () => {
       alert(error.response?.data);
     }
   }
-// console.log(allBranch)
+
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5050/branch/delete/${id}`);
+      alert("Record deleted successfully!");
+      getBranch();
+    } catch (error) {
+      console.error("Error deleting record:", error);
+    }
+  }
+
+  const handleView = async (x) => {
+    try {
+      const res = await axios.get(`http://localhost:5050/branch/findone/${x._id}`);
+      setSelectedItem(res.data);
+      setView(true);
+
+    }
+    catch (error) {
+      console.error("Error fetching record details:", error);
+    }
+  }
+
+   const handlEdit = async (e) => {
+        e.preventDefault();
+        try {            await axios.put(`http://localhost:5050/branch/update/${editData._id}`, editinput);
+            alert("Record updated successfully!");
+            setIsOpen(false);
+            getBranch();
+        } catch (error) {
+            console.error("Error updating record:", error);
+        }   
+    }
+  // console.log(allBranch)
   return (
     <div className={`ml-64 mt-14 min-h-screen items-center justify-center px-4 py-8 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
       {open && (
@@ -276,17 +320,17 @@ const LocationSelector = () => {
                     Branch Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                     Branch Code
+                    Branch Code
                   </th>
-                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     totalAgents
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Location
                   </th>
-                 
-                
-                 
+
+
+
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                     Action
                   </th>
@@ -308,11 +352,11 @@ const LocationSelector = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       {item.address}
                     </td>
-                  
+
                     <td className="px-4 py-2">
                       <div className="flex items-center justify-center gap-2">
                         <button
-                          // onClick={() => handleView(item)}
+                          onClick={() => handleView(item)}
                           className="text-gray-600 hover:text-gray-800"
                           title="View"
                         >
@@ -320,10 +364,10 @@ const LocationSelector = () => {
                         </button>
 
                         <button
-                          // onClick={() => {
-                          //   setEditData(item);
-                          //   setIsOpen(true);
-                          // }}
+                          onClick={() => {
+                            setEditData(item);
+                            setIsOpen(true);
+                          }}
                           className="text-yellow-500 hover:text-yellow-600"
                           title="Edit"
                         >
@@ -331,7 +375,7 @@ const LocationSelector = () => {
                         </button>
 
                         <button
-                          // onClick={() => handleDelete(item._id)}
+                          onClick={() => handleDelete(item._id)}
                           className="text-red-600 hover:text-red-800"
                           title="Delete"
                         >
@@ -347,7 +391,127 @@ const LocationSelector = () => {
           </div>
 
         </div>
-       )} 
+      )}
+
+
+      {view && selectedItem && (
+                    <div
+                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                        onClick={() => setView(false)}
+                    >
+                        <div
+                            onClick={(e) => e.stopPropagation()}
+                            className=" rounded-2xl shadow-2xl p-6 w-full max-w-md"
+                        >
+                            <h2 className="text-xl font-bold mb-4">📋 Policy Details</h2>
+
+                            <div className="space-y-3 text-sm">
+                                <div className="flex justify-between">
+                                    <span>branchName:</span>
+                                    <span>{selectedItem?.branchName}</span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span>branchCode:</span>
+                                    <span>
+                                        {selectedItem?.branchCode}
+                                    </span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span>totalAgents:</span>
+                                    <span>{selectedItem?.totalAgents}</span>
+                                </div>
+
+                                <div className="flex justify-between">
+                                    <span>address:</span>
+                                    <span>{selectedItem?.address}</span>
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={() => setView(false)}
+                                className="mt-5 w-full py-2 bg-blue-500 text-white rounded-xl"
+                            >
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+
+
+
+                {isOpen && editData && (
+        <>
+        <div className={`fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+                    <form onSubmit={handlEdit} className=" rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md">
+                        <h2 className="text-2xl font-bold mb-6">Edit Police</h2>
+
+                        <div className="space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                   branchName
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editinput.branchName}
+                                    onChange={(e) => setEditInput({ ...editinput, branchName: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    branchCode
+                                </label>
+                                <input
+                                    type="number"
+                                    value={editinput.branchCode}
+                                    onChange={(e) => setEditInput({ ...editinput, branchCode: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    address
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editinput.address}
+                                    onChange={(e) => setEditInput({ ...editinput, address: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                           
+
+                        </div>
+
+                        <div className="flex gap-3 mt-6">
+                            <button
+                                type="submit"
+                                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+                            >
+                                Submit
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => setIsOpen(false)}
+                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+          
+        </>
+      )}
 
       {showForm && (
         <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center z-50">

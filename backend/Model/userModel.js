@@ -38,6 +38,10 @@ const user = new mongoose.Schema({
     type: String,
     enum: ["admin", "user", "agent"],
     default: "user"
+  },
+    agentId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Agent"
   }
 
 });

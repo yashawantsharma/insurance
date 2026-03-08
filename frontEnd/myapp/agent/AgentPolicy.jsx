@@ -3,14 +3,25 @@ import { set } from 'mongoose';
 import React, { useEffect, useState } from 'react'
 import { MdDelete, MdEdit, MdViewCozy, MdVisibility } from 'react-icons/md';
 
-const UserPolice = () => {
+const AgentPolicy = () => {
     const [data, setData] = useState([]);
     const [input, setInput] = useState({
-        premiumAmount: "",
-        purchaseDate: "",
-        startDate: "",
-        nextInstallmentDate: "",
-        paymentMode: "",
+        fullName: "",
+        endDate: "",
+        amount: "",
+        installmentDuration: "",
+        installmentAmount: "",
+        totalAmount: "",
+        profitAmount: "",
+    })
+    const [editinput, setEditInput] = useState({
+        fullName: "",
+        endDate: "",
+        amount: "",
+        installmentDuration: "",
+        installmentAmount: "",
+        totalAmount: "",
+        profitAmount: "",
     })
     const [formOpen, setFormOpen] = useState(false);
     const [theme, setTheme] = useState("light");
@@ -18,12 +29,44 @@ const UserPolice = () => {
     const [selectedItem, setSelectedItem] = useState(null);
     const [search, setSearch] = useState("");
     const [isOpen, setIsOpen] = useState(false);
-    const [editData, setEditData] = useState(null);
+  const [editData, setEditData] = useState(null);
 
     useEffect(() => {
         fatchall();
         getTheme();
     }, [])
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        const updatedData = {
+            ...input,
+            [name]: value
+        };
+
+        const amount = Number(updatedData.amount) || 0;
+        const profit = Number(updatedData.profitAmount) || 0;
+
+        updatedData.totalAmount = amount + profit;
+
+        setInput(updatedData);
+    };
+
+    const handelselect = (e) => {
+        const { name, value } = e.target;
+        const updatedData = {
+            ...input,
+            [name]: value
+        };
+
+        const totalAmount = Number(updatedData.totalAmount) || 0;
+        const installmentDuration = Number(updatedData.installmentDuration) || 0;
+
+        updatedData.installmentAmount = totalAmount / installmentDuration;
+
+        setInput(updatedData);
+    };
+
+
 
 
 
@@ -53,7 +96,15 @@ const UserPolice = () => {
         }
     }
 
-
+    const handleDelete = async (id) => {
+        try {
+            await axios.delete(`http://localhost:5050/police/delete/${id}`);
+            alert("Record deleted successfully!");
+            fatchall();
+        } catch (error) {
+            console.error("Error deleting record:", error);
+        }
+    }
 
     const handleView = async (x) => {
         try {
@@ -67,47 +118,20 @@ const UserPolice = () => {
         }
     }
 
-
-    const formopen = async (x) => {
-        try {
-
+    const handlEdit = async (e) => {
+        e.preventDefault();
+        try {            await axios.put(`http://localhost:5050/police/update/${editData._id}`, editinput);
+            alert("Record updated successfully!");
+            setIsOpen(false);
+            fatchall();
         } catch (error) {
-
-        }
+            console.error("Error updating record:", error);
+        }   
     }
-
 
     const filteredData = data.filter((item) =>
         item.fullName.toLowerCase().includes(search.toLowerCase())
     );
-
-    const handlsubmit = async (e) => {
-        // console.log(input)
-        const token=localStorage.getItem("token")
-        e.preventDefault();
-        try {
-            await axios.post("http://localhost:5050/CustomerPolicy/", input,{
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            alert("Police Bay successfully!");
-            // console.log(res.data);
-
-            setFormOpen(false);
-
-        } catch (error) {
-            console.error("Error submitting form:", error);
-        }
-    }
-
-    const handelselect = (e) => {
-        const { name, value } = e.target;
-        const updatedData = {
-            ...input,
-            [name]: value
-        };
-
-        setInput(updatedData);
-    };
 
     return (
 
@@ -115,6 +139,8 @@ const UserPolice = () => {
 
             <div className="flex justify-between items-center mb-6 mt-10">
                 <h1 className="text-2xl font-bold">Investment Records</h1>
+
+
 
             </div>
             <input
@@ -132,7 +158,7 @@ const UserPolice = () => {
                     <thead className="bg-gray-50 ">
                         <tr>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                Full Name
+                                Policy Name
                             </th>
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 End Date
@@ -146,12 +172,12 @@ const UserPolice = () => {
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Total Amount
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                                installmentDuration
+                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                               installmentDuration
                             </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 installmentAmount
-                            </th>
+                            </th>   
                             <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
                                 Action
                             </th>
@@ -186,18 +212,29 @@ const UserPolice = () => {
                                     <div className="flex items-center justify-center gap-2">
                                         <button
                                             onClick={() => handleView(item)}
-                                            className="text-white-600 hover:text-gray-800"
+                                            className="text-gray-600 hover:text-gray-800"
                                             title="View"
                                         >
                                             <MdVisibility size={20} />
                                         </button>
 
                                         <button
-                                            onClick={() => setFormOpen(true)}
-                                            className=" bg-red-600 h-8 w-15  hover:text-red-800"
+                                            onClick={() => {
+                                                setEditData(item);
+                                                setIsOpen(true);
+                                            }}
+                                            className="text-yellow-500 hover:text-yellow-600"
+                                            title="Edit"
+                                        >
+                                            <MdEdit size={20} />
+                                        </button>
+
+                                        <button
+                                            onClick={() => handleDelete(item._id)}
+                                            className="text-red-600 hover:text-red-800"
                                             title="Delete"
                                         >
-                                            Bay
+                                            <MdDelete size={20} />
                                         </button>
                                     </div>
                                 </td>
@@ -265,50 +302,48 @@ const UserPolice = () => {
                 )}
             </div>
 
-
-
-
-            {formOpen && (
-                <div className={`fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
-                    <form onSubmit={handlsubmit} className=" rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md">
-                        <h2 className="text-2xl font-bold mb-6">Policy Bay</h2>
+            {isOpen && editData && (
+        <>
+        <div className={`fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+                    <form onSubmit={handlEdit} className=" rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md">
+                        <h2 className="text-2xl font-bold mb-6">Edit Police</h2>
 
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    premiumAmount
+                                    Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    value={editinput.fullName}
+                                    onChange={(e) => setEditInput({ ...editinput, fullName: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    End Date
+                                </label>
+                                <input
+                                    type="date"
+                                    value={editinput.endDate}
+                                    onChange={(e) => setEditInput({ ...editinput, endDate: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">
+                                    Amount
                                 </label>
                                 <input
                                     type="number"
-                                    value={input.premiumAmount}
-                                    onChange={(e) => setInput({ ...input, premiumAmount: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    purchaseDate
-                                </label>
-                                <input
-                                    type="date"
-                                    value={input.purchaseDate}
-                                    onChange={(e) => setInput({ ...input, purchaseDate: e.target.value })}
-                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
-                                    required
-                                />
-                            </div>
-
-                            <div>
-                                <label className="block text-sm font-medium mb-2">
-                                    startDate
-                                </label>
-                                <input
-                                    type="date"
                                     name="amount"
-                                    value={input.startDate}
-                                   onChange={(e) => setInput({ ...input, startDate: e.target.value })}
+                                    value={editinput.amount}
+                                    onChange={(e) => setEditInput({ ...editinput, amount: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     required
                                 />
@@ -316,49 +351,67 @@ const UserPolice = () => {
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    nextInstallmentDate
+                                    Profit Amount
                                 </label>
                                 <input
-                                    type="date"
+                                    type="number"
+                                    name="profitAmount"
 
-                                    value={input.nextInstallmentDate}
-                                    onChange={(e) => setInput({ ...input, nextInstallmentDate: e.target.value })}
-                                    className={`w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white `}
+                                    value={editinput.profitAmount}
+                                    onChange={(e) => setEditInput({ ...editinput, profitAmount: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     required
                                 />
                             </div>
 
 
-                            {/* <div>
+                            <div>
                                 <label className="block text-sm font-medium mb-2">
-                                    installmentsPaid
+                                    Total Amount
                                 </label>
                                 <input
                                     type="number"
                                     name="totalAmount"
-                                    value={input.installmentsPaid}
+                                    value={editinput.totalAmount}
+                                     onChange={(e) => setEditInput({ ...editinput, totalAmount: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     required
                                 />
-                            </div> */}
+                            </div>
 
 
 
-                            <select
-                                name="paymentMode"
-                                value={input.paymentMode}
-                                onChange={handelselect}
-                                className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}
-                                required
-                            >
-                                <option value="">Select Payment Mode</option>
-                                <option value="cash">cash</option>
-                                <option value="upi">upi</option>
-                                <option value="card">card</option>
-                                <option value="bank">bank</option>
-                            </select>
+                            <div>
+                                <label className=" text-sm font-medium mb-2">
+                                    installmentDuration
+                                </label>
+                                <select
+                                    value={editinput.installmentDuration}
+                                    name="installmentDuration"
+                                    onChange={(e) => setEditInput({ ...editinput, installmentDuration: e.target.value })}
+                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500`}
+                                    required
+                                >
+                                    <option value="">Select Duration</option>
+                                    <option value="6">6 months</option>
+                                    <option value="12">12 months</option>
+                                    <option value="24">24 months</option>
+                                </select>
+                            </div>
 
-
+                            <div>
+                                <label className=" text-sm font-medium mb-2">
+                                    installmentAmount
+                                </label>
+                                <input
+                                    type="number"
+                                    value={editinput.installmentAmount}
+                                    name="installmentAmount"
+                                    onChange={(e) => setEditInput({ ...editinput, installmentAmount: e.target.value })}
+                                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
+                                    required
+                                />
+                            </div>
 
                         </div>
 
@@ -371,7 +424,7 @@ const UserPolice = () => {
                             </button>
                             <button
                                 type="button"
-                                onClick={() => setFormOpen(false)}
+                                onClick={() => setIsOpen(false)}
                                 className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200"
                             >
                                 Cancel
@@ -379,9 +432,14 @@ const UserPolice = () => {
                         </div>
                     </form>
                 </div>
-            )}
+          
+        </>
+      )}
+
+
+           
         </div>
     )
 }
 
-export default UserPolice
+export default AgentPolicy

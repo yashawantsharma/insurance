@@ -20,6 +20,8 @@ import ProtectedRoute from './ProtectedRoute'
 import AgentDashboard from '../agent/AgentDashboard'
 import UserDashboard from '../user/UserDashboard'
 import UserPolice from '../user/UserPolice'
+import AgentPolicy from '../agent/AgentPolicy'
+import Agentuser from '../agent/Agentuser'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -44,14 +46,20 @@ function App() {
       <Route path='/reset' element={
         <Reset/>}/>
       <Route path='/location' element={<LocationSelector/>}/>
-       <Route path='/police' element={<Police/>}/>
+       <Route path='/police' element={<ProtectedRoute allowedRoles={["admin"]}>
+        <Police/></ProtectedRoute>}/>
        <Route path='/agent' element={<Agent/>}/>
-       <Route path='/user' element={<User/>}/>
+       <Route path='/user' element={ <ProtectedRoute allowedRoles={["admin"]}><User/></ProtectedRoute>}/>
        <Route path='/allbranch' element={<AllBranch/>}/>
        <Route path='/' element={
          <ProtectedRoute allowedRoles={["admin"]}>
         <Dashboard/>
         </ProtectedRoute>}/>
+        <Route path='/agentpolicy' element={
+         <ProtectedRoute allowedRoles={["agent"]}>
+        <AgentPolicy/>
+        </ProtectedRoute>}/>
+        
         <Route path='/agentdashboard' element={
          <ProtectedRoute allowedRoles={["agent"]}>
         <AgentDashboard/>
@@ -63,6 +71,10 @@ function App() {
          <Route path='/userpolice' element={
          <ProtectedRoute allowedRoles={["user"]}>
         <UserPolice/>
+        </ProtectedRoute>}/>
+         <Route path='/agentuser' element={
+         <ProtectedRoute allowedRoles={["agent"]}>
+        <Agentuser/>
         </ProtectedRoute>}/>
         
         

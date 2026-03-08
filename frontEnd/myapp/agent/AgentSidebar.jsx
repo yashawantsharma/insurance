@@ -31,19 +31,14 @@ const AgentSidebar = () => {
                 >
                     📖 My Courses
                 </button> */}
-                 <button
-                    onClick={() => handleNavigate("/location")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                    📖 Location
-                </button>
+               
 
 
                 <button
-                    onClick={() => handleNavigate("/police")}
+                    onClick={() => handleNavigate("/agentpolicy")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
-                    Police
+                    Policy
                 </button> 
                 <button
                     onClick={() => handleNavigate("/agent")}
@@ -53,7 +48,7 @@ const AgentSidebar = () => {
                 </button>
 
                 <button
-                    onClick={() => handleNavigate("/user")}
+                    onClick={() => handleNavigate("/agentuser")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
                     User List

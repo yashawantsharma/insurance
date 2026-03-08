@@ -28,9 +28,9 @@ const customerPolicySchema = new mongoose.Schema({
     type: Date
   },
 
-  endDate: {
-    type: Date
-  },
+  // NextDueDate: {
+  //   type: Date
+  // },
 
   premiumAmount: {
     type: Number,

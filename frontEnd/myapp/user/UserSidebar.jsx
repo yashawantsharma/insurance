@@ -43,7 +43,7 @@ const UserSidebar = () => {
                     onClick={() => handleNavigate("/userpolice")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
-                    Police
+                    Policy
                 </button> 
                 
 

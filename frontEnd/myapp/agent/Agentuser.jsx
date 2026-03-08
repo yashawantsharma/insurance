@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md';
 
-const User = () => {
+const Agentuser = () => {
     const [data, setData] = useState([])
     const [theme, setTheme] = useState("");
     const [view, setView] = useState(false);
@@ -32,13 +32,20 @@ const User = () => {
         fatchdata()
         fatchTheme()
     }, [])
+    // console.log(data);
+    
 
     const fatchdata = async (e) => {
+        const token=localStorage.getItem("token")
         // e.preventDefault()
         // e.preventDefault();
         try {
-            const res = await axios.get("http://localhost:5050/user/findall")
-            setData(res.data)
+            const res = await axios.get("http://localhost:5050/user/oneuser", {
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+            setData(res.data.users)
         }
         catch (error) {
 
@@ -84,11 +91,11 @@ const User = () => {
         e.preventDefault();
         const token = localStorage.getItem("token");
         try {
-            await axios.post("http://localhost:5050/user/", input,{
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
-                });
+            await axios.post("http://localhost:5050/user/", input, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
             alert("Data submitted successfully!");
             fatchdata()
             setShowForm(false);
@@ -111,30 +118,30 @@ const User = () => {
         }
     }
 
-    const handleDelete=async(x)=>{
+    const handleDelete = async (x) => {
         try {
             await axios.delete(`http://localhost:5050/user/delete/${x}`)
             alert("Data Delete Successfully")
             fatchdata()
         } catch (error) {
-            
+
         }
     }
 
     const editdatashow = (item) => {
-  setEditInput({
-    name: item.name || "",
-    email: item.email || "",
-    password: "",
-    role: item.role || "",
-    gender: item.gender || "",
-    phone: item.phone || "",
-  });
+        setEditInput({
+            name: item.name || "",
+            email: item.email || "",
+            password: "",
+            role: item.role || "",
+            gender: item.gender || "",
+            phone: item.phone || "",
+        });
 
-  setIsOpen(true);
-};
+        setIsOpen(true);
+    };
 
- const filteredData = filtredata.filter((item) =>
+    const filteredData = filtredata.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase())
     );
 
@@ -156,7 +163,7 @@ const User = () => {
                 </button>
             </div>
 
-             <input
+            <input
                 type="text"
                 placeholder="Search by name..."
                 value={search}
@@ -514,4 +521,4 @@ const User = () => {
     )
 }
 
-export default User
+export default Agentuser

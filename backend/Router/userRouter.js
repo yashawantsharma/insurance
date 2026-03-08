@@ -5,7 +5,7 @@ const route = express.Router();
 const userController = require("../Controller/userController");
 const auth = require("../Middleware/auth");
 
-route.post("/", userController.register);
+route.post("/",auth, userController.register);
 route.get("/findall",userController.findAll);
 route.get("/findone/:id",userController.findOne);
 route.put("/update/:id",userController.update);
@@ -16,5 +16,6 @@ route.post("/reset",userController.reset);
 route.post("/updatetheme",auth,userController.updatetheme)
 route.get("/theme",auth,userController.findTheme);
 route.post("/otp",userController.sendotp)
+route.get("/oneuser",auth,userController.getOneUsers)
 
 module.exports=route

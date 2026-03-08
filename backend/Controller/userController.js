@@ -29,10 +29,10 @@ exports.register = async (req, res) => {
         if (userExist) {
             return res.status(400).json({ message: "User already exists" });
         }
-        password = generatePassword();
+       const password = generatePassword();
          const salt = bcrypt.genSaltSync(10)
         const hash = bcrypt.hashSync(password, salt);
-        const data = { name, email, phone, password: hash, gender,role };
+        const data = { name, email, phone, password: hash, gender,role,agentId: req.user._id }
         const newUser = new user(data);
         await newUser.save();
          const transporter = nodemailer.createTransport({
@@ -316,3 +316,22 @@ exports.sendotp = async (req, res) => {
         return res.status(400).json({ error: error.message })
     }
 }
+
+
+
+
+
+exports.getOneUsers = async (req, res) => {
+  try {
+
+    const users = await user.find({
+      agentId: req.user._id
+    });
+
+    res.json({users
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
