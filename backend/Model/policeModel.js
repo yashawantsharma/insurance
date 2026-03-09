@@ -22,6 +22,10 @@ const policeSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "user",
         },
+        // agentId: {
+        //     type: mongoose.Schema.Types.ObjectId,
+        //     ref: "Agent"
+        // },
 
         policeLocation: {
             type: mongoose.Schema.Types.ObjectId,
@@ -35,7 +39,7 @@ const policeSchema = new mongoose.Schema(
         status: {
             type: String,
             enum: ["active", "completed", "pending"],
-            default: "pending",
+            default: "active",
         },
         endDate: {
             type: Date,
@@ -49,7 +53,18 @@ const policeSchema = new mongoose.Schema(
         },
         profitAmount: {
             type: Number,
-        }
+        },
+        commissionPercent: {
+            type: Number,
+            default: 10
+        },
+
+        commissionAmount: Number,
+          duration: {
+            type: Number,
+            enum: [5, 10, 15, 20, 25],
+            required: true
+        },
     },
     { timestamps: true }
 );

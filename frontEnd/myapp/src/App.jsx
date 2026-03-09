@@ -22,6 +22,7 @@ import UserDashboard from '../user/UserDashboard'
 import UserPolice from '../user/UserPolice'
 import AgentPolicy from '../agent/AgentPolicy'
 import Agentuser from '../agent/Agentuser'
+import UserMyPolicy from '../user/UserMyPolicy'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -67,6 +68,10 @@ function App() {
          <Route path='/userdashboard' element={
          <ProtectedRoute allowedRoles={["user"]}>
         <UserDashboard/>
+        </ProtectedRoute>}/>
+        <Route path='/usermypolicy' element={
+         <ProtectedRoute allowedRoles={["user"]}>
+        <UserMyPolicy/>
         </ProtectedRoute>}/>
          <Route path='/userpolice' element={
          <ProtectedRoute allowedRoles={["user"]}>

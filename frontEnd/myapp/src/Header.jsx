@@ -88,15 +88,10 @@ const Header = () => {
       >
         {viewTheme === "dark" ? "☀️" : "🌙"}
       </button>
-            <button
-              onClick={() => handleNavigate("/login")}
-              className=" border p-1 "
-            >
-              Login
-            </button>
-          <span className="hidden md:block text-sm">
+            
+          {/* <span className="hidden md:block text-sm">
             Yashawant Sharma
-          </span>
+          </span> */}
 
           <button
             onClick={() => setProfileOpen(true)}

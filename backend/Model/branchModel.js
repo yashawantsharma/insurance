@@ -17,23 +17,60 @@ const branchSchema = new mongoose.Schema(
     district: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "District",
-      // required: true,
     },
+
+    // state: {
+    //    type: mongoose.Schema.Types.ObjectId,
+    //   ref: "State",
+    // },
+
+    address: {
+      type: String,
+    },
+
+    pincode: {
+      type: String,
+    },
+
+    phone: {
+      type: String,
+    },
+
+    email: {
+      type: String,
+    },
+
+    branchManager: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Agent",
+    },
+
     totalAgents: {
       type: Number,
       default: 0,
     },
 
-    address: {
-      type: String,
+    totalCustomers: {
+      type: Number,
+      default: 0,
+    },
+
+    totalPolicies: {
+      type: Number,
+      default: 0,
     },
 
     isActive: {
       type: Boolean,
       default: true,
     },
+
+    // createdBy: {
+    //   type: mongoose.Schema.Types.ObjectId,
+    //   ref: "User",
+    // }
   },
   { timestamps: true }
 );
 
-module.exports = mongoose.model("branch", branchSchema);
+module.exports = mongoose.model("Branch", branchSchema);

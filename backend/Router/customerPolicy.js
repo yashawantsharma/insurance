@@ -5,9 +5,10 @@ const CustomerPolicyController = require("../Controller/customerPolicy");
 const auth=require("../Middleware/auth")
 
 route.post("/",auth,CustomerPolicyController.addcustomer);
-// route.get("/findall", branchController.getAllBranch);
-// route.get("/findone/:id", branchController.getBranchById);
-// route.put("/update/:id", branchController.updateBranch);
-// route.delete("/delete/:id", branchController.deleteBranch);
+route.get("/findall", CustomerPolicyController.getAllcustomer);
+route.get("/findone/:id", CustomerPolicyController.onecustomer);
+route.put("/update/:id", CustomerPolicyController.updatecustomer);
+route.delete("/delete/:id", CustomerPolicyController.deletecustomer);
+route.get("/mypolicies", auth, CustomerPolicyController.getMyPolicies);
 
 module.exports = route;

@@ -19,31 +19,32 @@ const agentSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-        education: {
+    education: {
       type: String,
       enum: ["10th", "12th", "graduate", "postgraduate"],
       required: true,
     },
 
-        aadhaarNumber: {
+    aadhaarNumber: {
       type: String,
       required: true,
     },
 
-        aadhaarImage: {
-      type: String, 
+    aadhaarImage: {
+      type: String,
       required: true,
     },
+    branchId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Branch"
+    },
 
-       profileImage: {
-      type: String, 
+    profileImage: {
+      type: String,
       default: "",
     },
     address: {
       type: String,
-      // district: String,
-      // city: String,
-      // pincode: String,
     },
 
     joiningDate: {
@@ -56,15 +57,7 @@ const agentSchema = new mongoose.Schema(
       default: 0,
     },
 
-    // commissionRate: {
-    //   type: Number, // percentage
-    //   default: 5,
-    // },
 
-    // totalCommissionEarned: {
-    //   type: Number,
-    //   default: 0,
-    // },
 
     policie: [
       {
@@ -73,10 +66,11 @@ const agentSchema = new mongoose.Schema(
       },
     ],
 
-    // isActive: {
-    //   type: Boolean,
-    //   default: true,
-    // },
+    isActive: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active"
+    }
   },
   { timestamps: true }
 );

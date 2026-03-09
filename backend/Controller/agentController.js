@@ -24,12 +24,12 @@ exports.addAgent = async (req, res) => {
         // console.log(file);
         const data1 =await  creareimage(file)
         const finalimage=data1[0].url;
-        const { fullName, email, phone, education, aadhaarNumber, aadhaarImage, profileImage, address, joiningDate, experienceYears } = req.body;
+        const { fullName, email, phone, education, aadhaarNumber, aadhaarImage, profileImage, address,branchId, joiningDate, experienceYears } = req.body;
 
         // if(!fullName || !email || !phone || !education || !aadhaarNumber || !aadhaarImage || !profileImage || !address || !joiningDate || !experienceYears){
         //     return res.status(400).json({ message: "All fields are required" });
         // }
-        // console.log(req.body);
+        console.log(req.body);
         const existingAgent = await agent.findOne({ email });
         if (existingAgent) {
             return res.status(400).json({ message: "Agent with this email already exists" });
@@ -48,6 +48,7 @@ exports.addAgent = async (req, res) => {
             aadhaarImage: finalimage,
             profileImage: finalimage,
             address,
+            branchId,
             joiningDate,
             experienceYears,
         });
@@ -170,3 +171,21 @@ exports.deleteAgent = async (req, res) => {
     }
 };
 
+
+
+exports.getBranchAgentCount = async (req, res) => {
+  try {
+
+    const { branchId } = req.params;
+
+    const agents = await agent.find({ branchId });
+
+    res.status(200).json({
+      totalAgents: agents.length,
+      agents
+    });
+
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

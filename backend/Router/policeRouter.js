@@ -9,5 +9,6 @@ route.get("/findall", policeController.getAllPolice);
 route.get("/findone/:id", policeController.getPoliceById);
 route.put("/update/:id", policeController.updatePolice);
 route.delete("/delete/:id", policeController.deletePolice);
+route.get("/customer-policy/:customerId",policeController.getCustomerPolicies)
 
 module.exports = route;

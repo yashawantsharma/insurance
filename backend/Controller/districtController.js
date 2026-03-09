@@ -17,10 +17,7 @@ exports.adddistrict=async(req,res)=>{
     
         
         if (existingdistrict) {
-          return res.status(200).json({
-            message: "Country already exists",
-            data: existingdistrict,
-          });
+          return res.status(200).json( existingdistrict);
         }
     
     

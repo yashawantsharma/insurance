@@ -2,10 +2,13 @@ const Police=require("../Model/policeModel");
 
 exports.addpolice=async(req,res)=>{
     try {
-    const { fullName,amount,installmentDuration,installmentAmount, endDate,totalAmount,profitAmount } = req.body;
+    const { fullName,amount,installmentDuration,installmentAmount, endDate,totalAmount,profitAmount,commissionPercent,duration } = req.body;
     if(!(fullName && amount && installmentDuration && installmentAmount && endDate && totalAmount && profitAmount)){
         return res.status(400).json({ message: "All fields are required" });
     }
+    console.log(req.body);
+    
+     const commissionAmount = (amount * commissionPercent)/100;
 
     const newPolice =new Police({
         fullName,
@@ -15,6 +18,8 @@ exports.addpolice=async(req,res)=>{
         endDate,
         totalAmount,
         profitAmount,
+        commissionAmount,
+        duration
     });
     
      await newPolice.save();
@@ -76,3 +81,20 @@ exports.deletePolice=async(req,res)=>{
     }
 
 };
+
+
+exports.getCustomerPolicies = async(req,res)=>{
+ try{
+
+ const policies = await Police.find({
+   customerId:req.params.customerId
+ })
+ .populate("agentId","name")
+ .populate("customerId","name")
+
+ res.json(policies)
+
+ }catch(err){
+ res.status(500).json(err.message)
+ }
+}

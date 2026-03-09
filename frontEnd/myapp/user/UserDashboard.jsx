@@ -3,177 +3,173 @@ import axios from "axios";
 
 const UserDashboard = () => {
 
-    const [branches, setBranches] = useState([])
-    const [agents, setAgents] = useState([])
-    const [policies, setPolicies] = useState([])
-    const [theme, setTheme] = useState("light");
+  const [policies, setPolicies] = useState([]);
+  const [theme, setTheme] = useState("light");
 
-    useEffect(() => {
-        fetchData()
-        getTheme()
-    }, [])
+  useEffect(() => {
+    fetchPolicies();
+    getTheme();
+  }, []);
 
-    const fetchData = async () => {
-        try {
+  const fetchPolicies = async () => {
 
-            const branchRes = await axios.get("http://localhost:5050/branch/findall")
-            const agentRes = await axios.get("http://localhost:5050/agent/findall")
-            const policyRes = await axios.get("http://localhost:5050/police/findall")
+    const token = localStorage.getItem("token");
 
-            setBranches(branchRes.data)
-            setAgents(agentRes.data)
-            setPolicies(policyRes.data)
+    try {
 
-        } catch (err) {
-            console.log(err)
+      const res = await axios.get(
+        "http://localhost:5050/CustomerPolicy/mypolicies",
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
+      );
+
+      setPolicies(res.data);
+
+    } catch (error) {
+      console.log(error);
     }
 
-    const getTheme = async () => {
-        const token = localStorage.getItem("token");
-        if (!token) return;
+  };
 
-        try {
-            const res = await axios.get("http://localhost:5050/user/theme", {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            setTheme(res.data.theme);
+  const getTheme = async () => {
+
+    const token = localStorage.getItem("token");
+
+    try {
+
+      const res = await axios.get(
+        "http://localhost:5050/user/theme",
+        {
+          headers: { Authorization: `Bearer ${token}` }
         }
-        catch (error) {
-            console.error("Error fetching theme:", error);
-        }
+      );
+
+      setTheme(res.data.theme);
+
+    } catch (error) {
+      console.log(error);
     }
 
-    return (
-        <div className={`ml-64 mt-14 p-8 min-h-screen transition-all duration-300 
-        ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
+  };
 
-            <h1 className="text-3xl font-bold mb-8 tracking-wide">
-                User Dashboard
-            </h1>
+  const totalPremium = policies.reduce(
+    (sum, item) => sum + Number(item.premiumAmount || 0),
+    0
+  );
 
-            <div className="grid grid-cols-4 gap-6">
+  return (
 
-                <div className="bg-gradient-to-r from-blue-500  text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-                    <p className="text-sm opacity-80">Total Branch</p>
-                    <h2 className="text-4xl font-bold mt-2">
-                        {branches.length}
-                    </h2>
-                </div>
+    <div
+      className={`ml-64 mt-14 p-8 min-h-screen 
+      ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}
+    >
 
-                <div className="bg-gradient-to-r from-green-500 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-                    <p className="text-sm opacity-80">Total Agents</p>
-                    <h2 className="text-4xl font-bold mt-2">
-                        {agents.length}
-                    </h2>
-                </div>
+      <h1 className="text-3xl font-bold mb-8">
+        User Dashboard
+      </h1>
 
-                <div className="bg-gradient-to-r from-purple-500 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-                    <p className="text-sm opacity-80">Total Policies</p>
-                    <h2 className="text-4xl font-bold mt-2">
-                        {policies.length}
-                    </h2>
-                </div>
+      
 
-                <div className="bg-gradient-to-r from-orange-400 text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition">
-                    <p className="text-sm opacity-80">Revenue</p>
-                    <h2 className="text-4xl font-bold mt-2">
-                        ₹2,45,000
-                    </h2>
-                </div>
+      <div className="grid grid-cols-3 gap-6">
 
-            </div>
+        <div className=" text-white p-6 rounded-xl shadow-lg">
+          <p>Total Policies</p>
+          <h2 className="text-4xl font-bold">
+            {policies.length}
+          </h2>
+        </div>
 
-            <div className="grid grid-cols-2 gap-6 mt-10">
+        <div className=" text-white p-6 rounded-xl shadow-lg">
+          <p>Total Premium Paid</p>
+          <h2 className="text-4xl font-bold">
+            ₹{totalPremium}
+          </h2>
+        </div>
 
-                <div className={`p-6 rounded-2xl shadow-lg backdrop-blur-lg 
-                ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
+        <div className=" text-white p-6 rounded-xl shadow-lg">
+          <p>Next Installment</p>
+          <h2 className="text-xl font-bold">
+            {policies[0]?.nextInstallmentDate?.split("T")[0] || "N/A"}
+          </h2>
+        </div>
 
-                    <h2 className="font-semibold mb-4 text-lg">
-                        Branch Overview
-                    </h2>
+      </div>
 
-                    <div className="h-40 flex items-center justify-center text-gray-400">
-                        Chart Here
-                    </div>
+      
 
-                </div>
+      <div
+        className={`mt-10 p-6 rounded-xl shadow 
+        ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}
+      >
 
-                <div className={`p-6 rounded-2xl shadow-lg backdrop-blur-lg 
-                ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
+        <h2 className="text-xl font-semibold mb-6">
+          My Policies
+        </h2>
 
-                    <h2 className="font-semibold mb-4 text-lg">
-                        Agent Performance
-                    </h2>
+        <div className="overflow-x-auto">
 
-                    <div className="h-40 flex items-center justify-center text-gray-400">
-                        Chart Here
-                    </div>
+          <table className="w-full">
 
-                </div>
+            <thead>
 
-            </div>
+              <tr className="bg-blue-500 text-white">
 
+                <th className="p-3">Policy Name</th>
+                <th className="p-3">Premium</th>
+                <th className="p-3">Start Date</th>
+                <th className="p-3">Next Installment</th>
+                <th className="p-3">Payment Mode</th>
 
-            <div className={`p-6 rounded-2xl shadow-lg mt-10 
-            ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
+              </tr>
 
-                <h2 className="font-semibold mb-6 text-lg">
-                    Recent Branch
-                </h2>
+            </thead>
 
-                <div className="overflow-x-auto">
+            <tbody>
 
-                    <table className="w-full text-left border-collapse">
+              {policies.map((item) => (
 
-                        <thead>
+                <tr
+                  key={item._id}
+                  className="border-b "
+                >
 
-                            <tr className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white">
+                  <td className="p-3">
+                    {item.policy?.fullName}
+                  </td>
 
-                                <th className="p-3">Branch Name</th>
-                                <th className="p-3">Code</th>
-                                <th className="p-3">Address</th>
+                  <td className="p-3">
+                    ₹{item.premiumAmount}
+                  </td>
 
-                            </tr>
+                  <td className="p-3">
+                    {item.startDate?.split("T")[0]}
+                  </td>
 
-                        </thead>
+                  <td className="p-3 text-red-500">
+                    {item.nextInstallmentDate?.split("T")[0]}
+                  </td>
 
-                        <tbody>
+                  <td className="p-3 capitalize">
+                    {item.paymentMode}
+                  </td>
 
-                            {branches.slice(0, 5).map((b, index) => (
+                </tr>
 
-                                <tr
-                                    key={b._id}
-                                    className={`border-b transition hover:bg-gray-200 
-                                    ${theme === "dark" ? "hover:bg-gray-700 border-gray-700" : ""}`}
-                                >
+              ))}
 
-                                    <td className="p-3 font-medium">
-                                        {b.branchName}
-                                    </td>
+            </tbody>
 
-                                    <td className="p-3">
-                                        {b.branchCode}
-                                    </td>
-
-                                    <td className="p-3">
-                                        {b.address}
-                                    </td>
-
-                                </tr>
-
-                            ))}
-
-                        </tbody>
-
-                    </table>
-
-                </div>
-
-            </div>
+          </table>
 
         </div>
-    );
+
+      </div>
+
+    </div>
+  );
 };
 
 export default UserDashboard;

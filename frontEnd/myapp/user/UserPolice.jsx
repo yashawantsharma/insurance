@@ -9,6 +9,7 @@ const UserPolice = () => {
         premiumAmount: "",
         purchaseDate: "",
         startDate: "",
+        policyId: "",
         nextInstallmentDate: "",
         paymentMode: "",
     })
@@ -19,6 +20,7 @@ const UserPolice = () => {
     const [search, setSearch] = useState("");
     const [isOpen, setIsOpen] = useState(false);
     const [editData, setEditData] = useState(null);
+    const [selectedPolicyId, setSelectedPolicyId] = useState(null);
 
     useEffect(() => {
         fatchall();
@@ -83,10 +85,10 @@ const UserPolice = () => {
 
     const handlsubmit = async (e) => {
         // console.log(input)
-        const token=localStorage.getItem("token")
+        const token = localStorage.getItem("token")
         e.preventDefault();
         try {
-            await axios.post("http://localhost:5050/CustomerPolicy/", input,{
+            await axios.post("http://localhost:5050/CustomerPolicy/", input, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert("Police Bay successfully!");
@@ -108,6 +110,32 @@ const UserPolice = () => {
 
         setInput(updatedData);
     };
+
+    const policyId = (id) => {
+        setInput({
+            ...input,
+            policyId: id
+        })
+    }
+
+    const selectedData = filteredData.find(
+        (item) => item._id === selectedPolicyId
+    );
+
+    const handleStartDate = (e) => {
+  const startDate = e.target.value;
+
+  const date = new Date(startDate);
+  date.setMonth(date.getMonth() + 6); 
+
+  const nextDate = date.toISOString().split("T")[0];
+
+  setInput({
+    ...input,
+    purchaseDate: startDate,
+    nextInstallmentDate: nextDate
+  });
+};
 
     return (
 
@@ -193,7 +221,11 @@ const UserPolice = () => {
                                         </button>
 
                                         <button
-                                            onClick={() => setFormOpen(true)}
+                                            onClick={() => {
+                                                policyId(item._id)
+                                                setSelectedPolicyId(item._id)
+                                                setFormOpen(true)
+                                            }}
                                             className=" bg-red-600 h-8 w-15  hover:text-red-800"
                                             title="Delete"
                                         >
@@ -274,18 +306,24 @@ const UserPolice = () => {
                         <h2 className="text-2xl font-bold mb-6">Policy Bay</h2>
 
                         <div className="space-y-4">
+                            {/* {filteredData.map((item, index) => ( */}
                             <div>
                                 <label className="block text-sm font-medium mb-2">
                                     premiumAmount
                                 </label>
+
                                 <input
+
                                     type="number"
-                                    value={input.premiumAmount}
-                                    onChange={(e) => setInput({ ...input, premiumAmount: e.target.value })}
+                                    value={selectedData?.installmentAmount || ""}
+                                    onChange={(e) =>
+                                        setInput({ ...input, premiumAmount: e.target.value })
+                                    }
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     required
                                 />
                             </div>
+                            {/* ))} */}
 
                             <div>
                                 <label className="block text-sm font-medium mb-2">
@@ -294,7 +332,7 @@ const UserPolice = () => {
                                 <input
                                     type="date"
                                     value={input.purchaseDate}
-                                    onChange={(e) => setInput({ ...input, purchaseDate: e.target.value })}
+                                    onChange={handleStartDate}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     required
                                 />
@@ -307,8 +345,8 @@ const UserPolice = () => {
                                 <input
                                     type="date"
                                     name="amount"
-                                    value={input.startDate}
-                                   onChange={(e) => setInput({ ...input, startDate: e.target.value })}
+                                    value={input.purchaseDate}
+                                    onChange={(e) => setInput({ ...input, startDate: e.target.value })}
                                     className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-700 dark:text-white"
                                     required
                                 />

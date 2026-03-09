@@ -16,10 +16,7 @@ exports.addcountries = async (req, res) => {
 
     
     if (existingcountry) {
-      return res.status(200).json({
-        message: "Country already exists",
-        data: existingcountry,
-      });
+      return res.status(200).json(existingcountry);
     }
 
 

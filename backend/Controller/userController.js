@@ -83,7 +83,7 @@ exports.register = async (req, res) => {
 
 exports.findAll = async (req, res) => {
     try {
-        const users = await user.find();
+        const users = await user.find().populate("agentId");
         res.status(200).json(users)
     }
     catch (error) {

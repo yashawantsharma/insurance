@@ -2,8 +2,9 @@ const branch = require("../Model/branchModel");
 
 exports.addbranch = async (req, res) => {
     try {
-        const { branchName, branchCode, address } = req.body;
-        if (!(branchName && branchCode && address)) {
+        const { branchName, branchCode, address,district,pincode,phone,email,branchManager,totalAgents,totalCustomers,totalPolicies,createdBy } = req.body;
+        
+        if (!(branchName && branchCode && address && district  && pincode  && phone && email && branchManager)) {
             return res.status(400).json({ message: "All fields are required" });
         }
 
@@ -12,9 +13,22 @@ exports.addbranch = async (req, res) => {
             return res.status(400).json({ message: "Branch already exists" });
         }
 
-        const newbranch = new branch({ branchName, branchCode, address });
-        await newbranch.save();
-        res.status(200).json(newbranch);
+         const newBranch = new branch({
+      branchName,
+      branchCode,
+      address,
+      district,
+      pincode,
+      phone,
+      email,
+      branchManager,
+      totalAgents,
+      totalCustomers,
+      totalPolicies,
+      createdBy
+    });
+        await newBranch.save();
+        res.status(200).json(newBranch);
     } catch (error) {
         res.status(400).json({ message: "branch no add" });
     }
@@ -22,10 +36,23 @@ exports.addbranch = async (req, res) => {
 
 exports.getAllBranch = async (req, res) => {
     try {
-        const branches = await branch.find();
-        res.status(200).json(branches);
+        const branches = await branch.find()
+            .populate('district')  
+            .populate('branchManager'); 
+
+        res.status(200).json({
+            success: true,
+            count: branches.length,
+            data: branches
+        });
+
     } catch (error) {
-        res.status(500).json({ message: "Internal server error" });
+        console.error("Error in getAllBranch:", error);
+        res.status(500).json({
+            success: false,
+            message: "Internal server error",
+            error: error.message
+        });
     }
 };
 

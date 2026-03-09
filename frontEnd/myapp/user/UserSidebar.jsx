@@ -63,12 +63,12 @@ const UserSidebar = () => {
                     🎓 Results
                 </button> */}
 
-                {/* <button
-                    onClick={() => handleNavigate("/allbranch")}
+                <button
+                    onClick={() => handleNavigate("/usermypolicy")}
                     className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
                 >
-                    All Branch
-                </button> */}
+                    My policy
+                </button>
             </div>
 
             <div className="px-4 py-4 border-t border-gray-700 mt-auto">
