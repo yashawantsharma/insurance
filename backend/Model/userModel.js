@@ -42,7 +42,33 @@ const user = new mongoose.Schema({
     agentId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Agent"
-  }
+  },
+     profileImage: {
+        type: String,
+        default: null
+    },
+     dateOfBirth: {
+        type: Date
+    },
+       fatherName: {
+        type: String,
+        default: ""
+    },
+    motherName: {
+        type: String,
+        default: ""
+    },
+    aadhaarNumber: {
+      type: String,
+      required: true,
+    },
+
+    aadhaarImage: {
+      type: String,
+      required: true,
+    },
+
+
 
 });
 

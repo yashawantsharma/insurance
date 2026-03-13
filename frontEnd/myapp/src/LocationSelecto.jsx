@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { 
-  MdDelete, MdEdit, MdVisibility, 
+import {
+  MdDelete, MdEdit, MdVisibility,
   MdFilterList, MdSearch, MdClear,
   MdPhone, MdEmail, MdLocationOn,
   MdCheckCircle, MdCancel,
@@ -20,7 +20,7 @@ const LocationSelector = () => {
   const [showForm, setShowForm] = useState(false);
   const [filteredBranches, setFilteredBranches] = useState([]);
   const [loading, setLoading] = useState(false);
-  
+
   const [searchTerm, setSearchTerm] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [filterManager, setFilterManager] = useState("");
@@ -60,6 +60,7 @@ const LocationSelector = () => {
   const [editData, setEditData] = useState(null);
   const [districtId, setDistrictId] = useState("");
   const [agent, setAgent] = useState([]);
+  const [data,setData]=useState([])
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -67,7 +68,7 @@ const LocationSelector = () => {
       alert("Please log in first.");
       return;
     }
-    
+
     fetchInitialData();
     getTheme();
     getBranch();
@@ -76,7 +77,24 @@ const LocationSelector = () => {
 
   useEffect(() => {
     applyFilters();
+    allagent()
+    const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
   }, [allBranch, searchTerm, filterStatus, filterManager, selectedDistrict]);
+  const allagent=async()=>{
+    try {
+       const res = await axios.get("http://localhost:5050/agent/findall");
+      setData(res.data);
+    } catch (error) {
+      
+    }
+  }
 
   const fetchInitialData = async () => {
     try {
@@ -90,7 +108,7 @@ const LocationSelector = () => {
   const getTheme = async () => {
     const token = localStorage.getItem("token");
     if (!token) return;
-    
+
     try {
       const res = await axios.get("http://localhost:5050/user/theme", {
         headers: { Authorization: `Bearer ${token}` },
@@ -107,7 +125,7 @@ const LocationSelector = () => {
       alert("Please log in first.");
       return;
     }
-    
+
     setLoading(true);
     try {
       const res = await axios.get("http://localhost:5050/branch/findall", {
@@ -136,7 +154,7 @@ const LocationSelector = () => {
   const applyFilters = () => {
     console.log("Filtering by district:", selectedDistrict);
     console.log("All branches:", allBranch);
-    
+
     let filtered = [...allBranch];
 
     // District filter - case insensitive comparison
@@ -148,12 +166,12 @@ const LocationSelector = () => {
           // Compare in lowercase to ignore case
           return item.district.name.toLowerCase() === selectedDistrict.toLowerCase();
         }
-        
+
         // Case 2: district is just a string
         if (typeof item.district === 'string') {
           return item.district.toLowerCase() === selectedDistrict.toLowerCase();
         }
-        
+
         return false;
       });
     }
@@ -161,7 +179,7 @@ const LocationSelector = () => {
     // Search filter
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(item => 
+      filtered = filtered.filter(item =>
         item.branchName?.toLowerCase().includes(term) ||
         item.branchCode?.toLowerCase().includes(term) ||
         item.address?.toLowerCase().includes(term) ||
@@ -215,7 +233,7 @@ const LocationSelector = () => {
     setSelectedDistrict("");
     setCities([]);
     setLocationSelected(false);
-    
+
     axios.post(`http://localhost:5050/Country/`, {
       countryname: countryName
     });
@@ -363,33 +381,65 @@ const LocationSelector = () => {
     return district.toString();
   };
 
-  const getStats = () => {
-    const total = allBranch.length;
-    const active = allBranch.filter(b => b.isActive).length;
-    const inactive = total - active;
-    const totalAgents = allBranch.reduce((sum, b) => sum + (b.totalAgents || 0), 0);
-    const totalCustomers = allBranch.reduce((sum, b) => sum + (b.totalCustomers || 0), 0);
-    const totalPolicies = allBranch.reduce((sum, b) => sum + (b.totalPolicies || 0), 0);
-    
-    return { total, active, inactive, totalAgents, totalCustomers, totalPolicies };
+  console.log(data);
+  
+
+ const getStats = () => {
+
+  const total = allBranch.length;
+
+  const active = allBranch.filter(b =>
+    b.isActive === true || b.isActive === "active"
+  ).length;
+  console.log(allBranch);
+  
+
+  const inactive = allBranch.filter(b =>
+    b.isActive === false || b.isActive === "inactive"
+  ).length;
+
+  // const totalAgents = newdata.reduce((sum, b) =>
+  //   sum + Number(b.totalAgents )
+  // , 0);
+  const totalAgents = (branchName) => {
+  return data.filter(a => a.branchId?.branchName === allBranch.branchName).length;
+};
+// console.log(totalAgents("ertyuio"));
+ 
+
+  const totalCustomers = allBranch.reduce((sum, b) =>
+    sum + Number(b.totalCustomers || 0)
+  , 0);
+
+  const totalPolicies = allBranch.reduce((sum, b) =>
+    sum + Number(b.totalPolicies || 0)
+  , 0);
+
+  return {
+    total,
+    active,
+    inactive,
+    totalAgents,
+    totalCustomers,
+    totalPolicies
   };
+
+};
 
   const stats = getStats();
 
   return (
-    <div className={`ml-64 mt-14 min-h-screen px-4 py-8 ${
-      theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-    }`}>
-      
+    <div className={`ml-64 mt-14 min-h-screen px-4 py-8 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
+      }`}>
+
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Branch Management</h1>
         <button
           onClick={() => setStatsView(!statsView)}
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-            theme === "dark" 
-              ? "bg-gray-800 hover:bg-gray-700" 
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme === "dark"
+              ? "bg-gray-800 hover:bg-gray-700"
               : "bg-white hover:bg-gray-100"
-          }`}
+            }`}
         >
           <MdDashboard size={20} />
           {statsView ? "Hide Dashboard" : "Show Dashboard"}
@@ -454,10 +504,9 @@ const LocationSelector = () => {
       )}
 
       {open && (
-        <div className="fixed inset-0 flex items-center justify-center z-50  bg-opacity-50">
-          <div className={`w-full max-w-md rounded-2xl shadow-2xl p-8 space-y-6 ${
-            theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
-          }`}>
+        <div className="fixe inset-0 flex items-center justify-center z-50  bg-opacity-50">
+          <div className={`w-full max-w-md rounded-2xl shadow-2xl p-8 space-y-6 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
+            }`}>
             <h2 className="text-2xl font-bold text-center">Select Location</h2>
 
             <div>
@@ -465,9 +514,8 @@ const LocationSelector = () => {
               <select
                 onChange={handleCountryChange}
                 value={selectedCountry}
-                className={`w-full rounded-lg px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                  theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                }`}
+                className={`w-full rounded-lg px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                  }`}
               >
                 <option value="">Select Country</option>
                 {countries.map((country) => (
@@ -482,9 +530,8 @@ const LocationSelector = () => {
                 <select
                   onChange={handleStateChange}
                   value={selectedState}
-                  className={`w-full rounded-lg px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`}
+                  className={`w-full rounded-lg px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`}
                 >
                   <option value="">Select State</option>
                   {states.map((state) => (
@@ -500,9 +547,8 @@ const LocationSelector = () => {
                 <select
                   onChange={handleDistrictChange}
                   value={selectedDistrict}
-                  className={`w-full rounded-lg px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`}
+                  className={`w-full rounded-lg px-3 py-2 border focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`}
                 >
                   <option value="">Select District / City</option>
                   {cities.map((city, index) => (
@@ -517,7 +563,7 @@ const LocationSelector = () => {
 
       {locationSelected && (
         <div className={`shadow-lg rounded-xl p-6 ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
-          
+
           <div className="flex justify-between items-center mb-4">
             <div>
               <h2 className="text-xl font-bold">
@@ -527,28 +573,26 @@ const LocationSelector = () => {
                 {selectedCountry} → {selectedState} → {selectedDistrict}
               </p>
             </div>
-            
+
             <div className="flex gap-2">
               <button
                 onClick={resetLocation}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                  theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"
+                  }`}
               >
                 <MdRefresh size={20} />
                 Change Location
               </button>
-              
+
               <button
                 onClick={() => setShowFilters(!showFilters)}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
-                  theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"
-                }`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg ${theme === "dark" ? "bg-gray-700 hover:bg-gray-600" : "bg-gray-200 hover:bg-gray-300"
+                  }`}
               >
                 <MdFilterList size={20} />
                 Filters
               </button>
-              
+
               <button
                 onClick={() => setShowForm(true)}
                 className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
@@ -567,9 +611,8 @@ const LocationSelector = () => {
                 placeholder="Search branches..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                  theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                }`}
+                className={`w-full pl-10 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                  }`}
               />
               {searchTerm && (
                 <button
@@ -589,9 +632,8 @@ const LocationSelector = () => {
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value)}
-                      className={`w-full border rounded-lg px-3 py-2 ${
-                        theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-black"
-                      }`}
+                      className={`w-full border rounded-lg px-3 py-2 ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-black"
+                        }`}
                     >
                       <option value="all">All Status</option>
                       <option value="active">Active</option>
@@ -604,9 +646,8 @@ const LocationSelector = () => {
                     <select
                       value={filterManager}
                       onChange={(e) => setFilterManager(e.target.value)}
-                      className={`w-full border rounded-lg px-3 py-2 ${
-                        theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-black"
-                      }`}
+                      className={`w-full border rounded-lg px-3 py-2 ${theme === "dark" ? "bg-gray-600 border-gray-500 text-white" : "bg-white border-gray-300 text-black"
+                        }`}
                     >
                       <option value="">All Managers</option>
                       {agent.map((a) => (
@@ -702,7 +743,7 @@ const LocationSelector = () => {
                         <div className="space-y-1 text-sm">
                           <div className="flex items-center gap-2">
                             <FaUsers size={12} className="text-green-500" />
-                            <span>Agents: {item.totalAgents || 0}</span>
+                            <span>Agents: {stats.totalAgents("")}</span>
                           </div>
                           <div className="flex items-center gap-2">
                             <MdPeople size={12} className="text-blue-500" />
@@ -752,7 +793,7 @@ const LocationSelector = () => {
       )}
 
       {view && selectedItem && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setView(false)}>
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={() => setView(false)}>
           <div onClick={(e) => e.stopPropagation()} className={`rounded-2xl shadow-2xl p-6 w-full max-w-2xl ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-xl font-bold">Branch Details</h2>
@@ -835,7 +876,7 @@ const LocationSelector = () => {
       )}
 
       {isOpen && editData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50">
           <form onSubmit={handleEdit} className={`rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold">Edit Branch</h2>
@@ -847,48 +888,42 @@ const LocationSelector = () => {
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-2">Branch Name</label>
-                <input type="text" value={editinput.branchName} onChange={(e) => setEditInput({ ...editinput, branchName: e.target.value })} 
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={editinput.branchName} onChange={(e) => setEditInput({ ...editinput, branchName: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Branch Code</label>
-                <input type="text" value={editinput.branchCode} onChange={(e) => setEditInput({ ...editinput, branchCode: e.target.value })} 
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={editinput.branchCode} onChange={(e) => setEditInput({ ...editinput, branchCode: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Address</label>
-                <input type="text" value={editinput.address} onChange={(e) => setEditInput({ ...editinput, address: e.target.value })} 
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={editinput.address} onChange={(e) => setEditInput({ ...editinput, address: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Pincode</label>
-                <input type="text" value={editinput.pincode} onChange={(e) => setEditInput({ ...editinput, pincode: e.target.value })} 
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} />
+                <input type="text" value={editinput.pincode} onChange={(e) => setEditInput({ ...editinput, pincode: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Phone</label>
-                <input type="tel" value={editinput.phone} onChange={(e) => setEditInput({ ...editinput, phone: e.target.value })} 
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} />
+                <input type="tel" value={editinput.phone} onChange={(e) => setEditInput({ ...editinput, phone: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-2">Email</label>
-                <input type="email" value={editinput.email} onChange={(e) => setEditInput({ ...editinput, email: e.target.value })} 
-                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} />
+                <input type="email" value={editinput.email} onChange={(e) => setEditInput({ ...editinput, email: e.target.value })}
+                  className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} />
               </div>
               <div className="flex items-center">
-                <input type="checkbox" id="isActive" checked={editinput.isActive} onChange={(e) => setEditInput({ ...editinput, isActive: e.target.checked })} 
+                <input type="checkbox" id="isActive" checked={editinput.isActive} onChange={(e) => setEditInput({ ...editinput, isActive: e.target.checked })}
                   className="w-4 h-4 text-blue-600 rounded focus:ring-blue-500" />
                 <label htmlFor="isActive" className="ml-2 text-sm font-medium">Active Branch</label>
               </div>
@@ -903,7 +938,7 @@ const LocationSelector = () => {
       )}
 
       {showForm && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center z-50">
           <div className={`rounded-xl shadow-2xl w-full max-w-md p-6 ${theme === "dark" ? "bg-gray-800" : "bg-white"}`}>
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold">Create New Branch in {selectedDistrict}</h3>
@@ -915,52 +950,45 @@ const LocationSelector = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium mb-1">Branch Name</label>
-                <input type="text" value={input.branchName} onChange={(e) => setInput({ ...input, branchName: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={input.branchName} onChange={(e) => setInput({ ...input, branchName: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Branch Code</label>
-                <input type="text" value={input.branchCode} onChange={(e) => setInput({ ...input, branchCode: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={input.branchCode} onChange={(e) => setInput({ ...input, branchCode: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Address</label>
-                <input type="text" value={input.address} onChange={(e) => setInput({ ...input, address: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={input.address} onChange={(e) => setInput({ ...input, address: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Pincode</label>
-                <input type="text" value={input.pincode} onChange={(e) => setInput({ ...input, pincode: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="text" value={input.pincode} onChange={(e) => setInput({ ...input, pincode: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Phone</label>
-                <input type="tel" value={input.phone} onChange={(e) => setInput({ ...input, phone: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="tel" value={input.phone} onChange={(e) => setInput({ ...input, phone: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Email</label>
-                <input type="email" value={input.email} onChange={(e) => setInput({ ...input, email: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required />
+                <input type="email" value={input.email} onChange={(e) => setInput({ ...input, email: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required />
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">Branch Manager</label>
-                <select value={input.branchManager} onChange={(e) => setInput({ ...input, branchManager: e.target.value })} 
-                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${
-                    theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
-                  }`} required>
+                <select value={input.branchManager} onChange={(e) => setInput({ ...input, branchManager: e.target.value })}
+                  className={`w-full border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300 text-black"
+                    }`} required>
                   <option value="">Select Agent</option>
                   {agent.map((agent) => (
                     <option key={agent._id} value={agent._id}>{agent.fullName}</option>

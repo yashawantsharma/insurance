@@ -23,6 +23,9 @@ import UserPolice from '../user/UserPolice'
 import AgentPolicy from '../agent/AgentPolicy'
 import Agentuser from '../agent/Agentuser'
 import UserMyPolicy from '../user/UserMyPolicy'
+import Allagent from '../agent/Allagent'
+import Payment from '../agent/Payment'
+import Allpayment from './Allpayment'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -55,6 +58,12 @@ function App() {
        <Route path='/' element={
          <ProtectedRoute allowedRoles={["admin"]}>
         <Dashboard/>
+        
+        </ProtectedRoute>}/>
+        <Route path='/allpayment' element={
+         <ProtectedRoute allowedRoles={["admin"]}>
+        <Allpayment/>
+        
         </ProtectedRoute>}/>
         <Route path='/agentpolicy' element={
          <ProtectedRoute allowedRoles={["agent"]}>
@@ -65,6 +74,15 @@ function App() {
          <ProtectedRoute allowedRoles={["agent"]}>
         <AgentDashboard/>
         </ProtectedRoute>}/>
+        <Route path='/allagent' element={
+         <ProtectedRoute allowedRoles={["agent"]}>
+        <Allagent/>
+        </ProtectedRoute>}/>
+        <Route path='/payment' element={
+         <ProtectedRoute allowedRoles={["agent"]}>
+        <Payment/>
+        </ProtectedRoute>}/>
+        
          <Route path='/userdashboard' element={
          <ProtectedRoute allowedRoles={["user"]}>
         <UserDashboard/>

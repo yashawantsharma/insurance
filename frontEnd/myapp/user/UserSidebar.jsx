@@ -12,67 +12,51 @@ const UserSidebar = () => {
 
     return (
         <div className="fixed top-14 left-0 h-[calc(100vh-56px)] w-64 bg-gray-900 text-white z-30 overflow-y-auto shadow-lg">
-            
-
             <div className="flex flex-col p-4 space-y-2">
                 <button
                     onClick={() => handleNavigate("/userdashboard")}
-                    className={`text-left px-4 py-3 rounded-lg font-semibold transitio
-                            ? "bg-indigo-600 text-white"
+                    className={`text-left px-4 py-3 rounded-lg font-semibold transition ${
+                        isActive("/userdashboard") 
+                            ? "bg-indigo-600 text-white" 
                             : "hover:bg-gray-700 text-gray-300"
-                        }`}
+                    }`}
                 >
                     📊 Dashboard
                 </button>
 
-                {/* <button
-                    onClick={() => handleNavigate("/role")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                    📖 My Courses
-                </button> */}
-                 {/* <button
-                    onClick={() => handleNavigate("/location")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                    📖 Location
-                </button> */}
-
-
                 <button
                     onClick={() => handleNavigate("/userpolice")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
+                    className={`text-left px-4 py-3 rounded-lg font-semibold transition ${
+                        isActive("/userpolice") 
+                            ? "bg-indigo-600 text-white" 
+                            : "hover:bg-gray-700 text-gray-300"
+                    }`}
                 >
-                    Policy
-                </button> 
-                
-
-               
-
-                {/* <button
-                    onClick={() => handleNavigate("/studentdashboard")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                    📋 Assignments
+                    📋 Available Policies
                 </button>
-
-                {/* <button
-                    onClick={() => handleNavigate("/studentdashboard")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
-                >
-                    🎓 Results
-                </button> */}
 
                 <button
                     onClick={() => handleNavigate("/usermypolicy")}
-                    className="text-left px-4 py-3 rounded-lg hover:bg-gray-700 text-gray-300 font-semibold transition"
+                    className={`text-left px-4 py-3 rounded-lg font-semibold transition ${
+                        isActive("/usermypolicy") 
+                            ? "bg-indigo-600 text-white" 
+                            : "hover:bg-gray-700 text-gray-300"
+                    }`}
                 >
-                    My policy
+                    📄 My Policies
                 </button>
             </div>
 
             <div className="px-4 py-4 border-t border-gray-700 mt-auto">
-                <button className="w-full px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition">
+                <button 
+                    onClick={() => {
+                        localStorage.removeItem("token");
+                        localStorage.removeItem("userId");
+                        localStorage.removeItem("userRole");
+                        navigate("/login");
+                    }}
+                    className="w-full px-4 py-2 border rounded-lg font-semibold transition transform hover:scale-105"
+                >
                     🚪 Logout
                 </button>
             </div>

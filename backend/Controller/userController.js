@@ -2,6 +2,7 @@ const user = require("../Model/userModel");
 const nodemailer = require("nodemailer");
 const bcrypt = require('bcrypt')
 const jwt = require("jsonwebtoken");
+const creareimage=require("../Utility/cloud").uploadImage
 
 
 function generatePassword(length = 4) {
@@ -20,9 +21,13 @@ function generatePassword(length = 4) {
 
 exports.register = async (req, res) => {
     try {
-        console.log(req.body);
-        const { name, email, phone, gender,role } = req.body;
-            if (!(name && email && phone && gender)) {
+        // console.log(req.body);
+        const file =req.files
+        // console.log(file);
+        const data1 =await  creareimage(file)
+        const finalimage=data1[0].url;
+        const { name, email, phone, gender,role,profileImage,dateOfBirth,fatherName,motherName,aadhaarNumber,aadhaarImage } = req.body;
+            if (!(name && email && phone && gender && aadhaarNumber && fatherName && motherName)) {
             return res.status(400).json({ message: "All input are required" });
         }
         const userExist = await user.findOne({ email });
@@ -32,7 +37,7 @@ exports.register = async (req, res) => {
        const password = generatePassword();
          const salt = bcrypt.genSaltSync(10)
         const hash = bcrypt.hashSync(password, salt);
-        const data = { name, email, phone, password: hash, gender,role,agentId: req.user._id }
+        const data = { name, email, phone, password: hash, gender,role,agentId: req.user._id ,profileImage:finalimage,dateOfBirth,fatherName,motherName,aadhaarNumber,aadhaarImage:finalimage}
         const newUser = new user(data);
         await newUser.save();
          const transporter = nodemailer.createTransport({

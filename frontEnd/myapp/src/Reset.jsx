@@ -18,6 +18,7 @@ const Reset = () => {
         alert("login first")
         navigate("/login")
       }
+      
       const fetchTheme = async () => {
       const res = await axios.get(
         "http://localhost:5050/user/theme",
@@ -26,6 +27,14 @@ const Reset = () => {
       setTheme(res.data.theme); 
     };
     fetchTheme()
+    const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     },[])
 
 

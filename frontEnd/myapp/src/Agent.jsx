@@ -50,7 +50,7 @@ const Agent = () => {
     joiningDate: "",
     experienceYears: "",
     branchId: "",
-    isActive:""
+    isActive: ""
   });
 
   useEffect(() => {
@@ -62,6 +62,14 @@ const Agent = () => {
 
   useEffect(() => {
     calculateSummary();
+    const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
   }, [data]);
 
   const calculateSummary = () => {
@@ -69,7 +77,7 @@ const Agent = () => {
     const activeAgents = data.filter(item => item.isActive === true).length;
     const totalExperience = data.reduce((sum, item) => sum + (item.experienceYears || 0), 0);
     const averageExperience = totalAgents > 0 ? (totalExperience / totalAgents).toFixed(1) : 0;
-    const graduateCount = data.filter(item => 
+    const graduateCount = data.filter(item =>
       item.education === "graduate" || item.education === "postgraduate"
     ).length;
 
@@ -205,11 +213,11 @@ const Agent = () => {
 
   const filteredData = data.filter((item) => {
     const matchesSearch = item.fullName?.toLowerCase().includes(search.toLowerCase()) ||
-                         item.email?.toLowerCase().includes(search.toLowerCase()) ||
-                         item.phone?.includes(search);
-    
+      item.email?.toLowerCase().includes(search.toLowerCase()) ||
+      item.phone?.includes(search);
+
     const matchesEducation = filterCriteria.education === "" || item.education === filterCriteria.education;
-    
+
     let matchesExperience = true;
     if (filterCriteria.experienceRange === "0-2") {
       matchesExperience = item.experienceYears >= 0 && item.experienceYears <= 2;
@@ -218,17 +226,17 @@ const Agent = () => {
     } else if (filterCriteria.experienceRange === "5+") {
       matchesExperience = item.experienceYears > 5;
     }
-    
+
     const matchesBranch = filterCriteria.branchId === "" || item.branchId === filterCriteria.branchId;
-    
-    const matchesStatus = filterCriteria.status === "" || 
-                         (filterCriteria.status === "active" && item.isActive === true) ||
-                         (filterCriteria.status === "inactive" && item.isActive === false);
-    
+
+    const matchesStatus = filterCriteria.status === "" ||
+      (filterCriteria.status === "active" && item.isActive === true) ||
+      (filterCriteria.status === "inactive" && item.isActive === false);
+
     return matchesSearch && matchesEducation && matchesExperience && matchesBranch && matchesStatus;
   });
   // console.log(filterCriteria);
-  
+
 
   const clearFilters = () => {
     setFilterCriteria({
@@ -318,7 +326,7 @@ const Agent = () => {
 
         <select
           value={filterCriteria.education}
-          onChange={(e) => setFilterCriteria({...filterCriteria, education: e.target.value})}
+          onChange={(e) => setFilterCriteria({ ...filterCriteria, education: e.target.value })}
           className={`border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
         >
           <option value="">All Education</option>
@@ -329,7 +337,7 @@ const Agent = () => {
 
         <select
           value={filterCriteria.experienceRange}
-          onChange={(e) => setFilterCriteria({...filterCriteria, experienceRange: e.target.value})}
+          onChange={(e) => setFilterCriteria({ ...filterCriteria, experienceRange: e.target.value })}
           className={`border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
         >
           <option value="">All Experience</option>
@@ -340,7 +348,7 @@ const Agent = () => {
 
         <select
           value={filterCriteria.branchId}
-          onChange={(e) => setFilterCriteria({...filterCriteria, branchId: e.target.value})}
+          onChange={(e) => setFilterCriteria({ ...filterCriteria, branchId: e.target.value })}
           className={`border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
         >
           <option value="">All Branches</option>
@@ -353,7 +361,7 @@ const Agent = () => {
 
         <select
           value={filterCriteria.status}
-          onChange={(e) => setFilterCriteria({...filterCriteria, status: e.target.value})}
+          onChange={(e) => setFilterCriteria({ ...filterCriteria, status: e.target.value })}
           className={`border px-3 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
         >
           <option value="">All Status</option>
@@ -446,7 +454,7 @@ const Agent = () => {
                   <td className="py-3 px-4">{agent.experienceYears} years</td>
                   <td className="py-3 px-4">{getBranchName(agent.branchId)}</td>
                   <td className="py-3 px-4">
-                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${agent.isActive? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
+                    <span className={`px-2 py-1 rounded-full text-xs font-semibold ${agent.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
                       {agent.isActive}
                     </span>
                   </td>
@@ -507,31 +515,31 @@ const Agent = () => {
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <span className="font-semibold">Full Name:</span>
                 <span>{selectedItem?.fullName}</span>
-                
+
                 <span className="font-semibold">Email:</span>
                 <span>{selectedItem?.email}</span>
-                
+
                 <span className="font-semibold">Phone:</span>
                 <span>{selectedItem?.phone}</span>
-                
+
                 <span className="font-semibold">Education:</span>
                 <span>{selectedItem?.education}</span>
-                
+
                 <span className="font-semibold">Aadhaar:</span>
                 <span>{selectedItem?.aadhaarNumber}</span>
-                
+
                 <span className="font-semibold">Address:</span>
                 <span>{selectedItem?.address}</span>
-                
+
                 <span className="font-semibold">Joining Date:</span>
                 <span>{selectedItem?.joiningDate?.split('T')[0]}</span>
-                
+
                 <span className="font-semibold">Experience:</span>
                 <span>{selectedItem?.experienceYears} years</span>
-                
+
                 <span className="font-semibold">Branch:</span>
                 <span>{getBranchName(selectedItem?.branchId)}</span>
-                
+
                 <span className="font-semibold">Status:</span>
                 <span>
                   <span className={`px-2 py-1 rounded-full text-xs font-semibold ${selectedItem?.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>

@@ -25,8 +25,17 @@ export default function Profile() {
       navigate("/login");
       return;
     }
+   
     fatchTheme();
     fetchUser();
+     const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
   }, [theme]);
 
   useEffect(() => {

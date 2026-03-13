@@ -47,13 +47,21 @@ const Police = () => {
 
     useEffect(() => {
         calculateSummary();
+        const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, [data]);
 
     const calculateSummary = () => {
         const totalInvestment = data.reduce((sum, item) => sum + (item.amount || 0), 0);
         const totalProfit = data.reduce((sum, item) => sum + (item.profitAmount || 0), 0);
         const activePolicies = data.filter(item => item.isActive === true).length;
-        
+
         setSummaryData({
             totalInvestment,
             totalProfit,
@@ -362,7 +370,7 @@ const Police = () => {
 
                 {view && selectedItem && (
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                        className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50"
                         onClick={() => setView(false)}
                     >
                         <div
@@ -424,7 +432,7 @@ const Police = () => {
             </div>
 
             {isOpen && editData && (
-                <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50`}>
+                <div className={`fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50`}>
                     <form onSubmit={handlEdit} className={`rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
                         <h2 className="text-2xl font-bold mb-6">Edit Police Record</h2>
                         <div className="space-y-4">
@@ -543,69 +551,90 @@ const Police = () => {
             )}
 
             {formOpen && (
-                <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50`}>
-                    <form onSubmit={handlsubmit} className={`rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
-                        <h2 className="text-2xl font-bold mb-6">Add New Record</h2>
-                        <div className="space-y-4">
+                <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+                    <form
+                        onSubmit={handlsubmit}
+                        className={`${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
+                            } w-full max-w-4xl p-8 rounded-2xl shadow-xl my-8`}
+                    >
+                        <h2 className="text-2xl font-semibold mb-6 text-center">Add New Record</h2>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">Full Name</label>
+                                <label className="block mb-1 font-medium">Full Name</label>
                                 <input
                                     type="text"
                                     value={input.fullName}
                                     onChange={(e) => setInput({ ...input, fullName: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">End Date</label>
+                                <label className="block mb-1 font-medium">End Date</label>
                                 <input
                                     type="date"
                                     value={input.endDate}
                                     onChange={(e) => setInput({ ...input, endDate: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">Amount</label>
+                                <label className="block mb-1 font-medium">Amount</label>
                                 <input
                                     type="number"
                                     name="amount"
                                     value={input.amount}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">Profit Amount</label>
+                                <label className="block mb-1 font-medium">Profit Amount</label>
                                 <input
                                     type="number"
                                     name="profitAmount"
                                     value={input.profitAmount}
                                     onChange={handleChange}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">Total Amount</label>
+                                <label className="block mb-1 font-medium">Total Amount</label>
                                 <input
                                     type="number"
                                     name="totalAmount"
                                     value={input.totalAmount}
                                     readOnly
-                                    className={`w-full px-3 py-2 border rounded-lg bg-gray-100 ${theme === "dark" ? "bg-gray-600 border-gray-600 text-white" : "bg-gray-100 border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg outline-none cursor-not-allowed ${theme === "dark"
+                                            ? "bg-gray-600 border-gray-600 text-white"
+                                            : "bg-gray-100 border-gray-300"
+                                        }`}
                                 />
                             </div>
+
                             <div>
-                                <label className="text-sm font-medium mb-2">Installment Duration</label>
+                                <label className="block mb-1 font-medium">Installment Duration</label>
                                 <select
                                     value={input.installmentDuration}
                                     name="installmentDuration"
                                     onChange={handelselect}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark"
+                                            ? "bg-gray-700 border-gray-600 text-white"
+                                            : "bg-white border-gray-300 text-black"
+                                        }`}
                                     required
                                 >
                                     <option value="">Select Duration</option>
@@ -614,52 +643,64 @@ const Police = () => {
                                     <option value="24">24 months</option>
                                 </select>
                             </div>
+
                             <div>
-                                <label className="text-sm font-medium mb-2">Installment Amount</label>
+                                <label className="block mb-1 font-medium">Installment Amount</label>
                                 <input
                                     type="number"
-                                    value={input.installmentAmount}
                                     name="installmentAmount"
+                                    value={input.installmentAmount}
                                     readOnly
-                                    className={`w-full px-3 py-2 border rounded-lg bg-gray-100 ${theme === "dark" ? "bg-gray-600 border-gray-600 text-white" : "bg-gray-100 border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg outline-none cursor-not-allowed ${theme === "dark"
+                                            ? "bg-gray-600 border-gray-600 text-white"
+                                            : "bg-gray-100 border-gray-300"
+                                        }`}
                                 />
                             </div>
+
                             <div>
-                                <label className="text-sm font-medium mb-2">Commission Percent</label>
+                                <label className="block mb-1 font-medium">Commission Percent</label>
                                 <input
                                     type="number"
+                                    name="commissionPercent"
                                     value={input.commissionPercent}
                                     onChange={(e) => setInput({ ...input, commissionPercent: e.target.value })}
-                                    name="commissionPercent"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
+
+                            {/* Policy Duration */}
                             <div>
-                                <label className="text-sm font-medium mb-2">Policy Duration</label>
+                                <label className="block mb-1 font-medium">Policy Duration</label>
                                 <input
                                     type="number"
+                                    name="duration"
                                     value={input.duration}
                                     onChange={(e) => setInput({ ...input, duration: e.target.value })}
-                                    name="duration"
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
+
                         </div>
-                        <div className="flex gap-3 mt-6">
-                            <button
-                                type="submit"
-                                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
-                            >
-                                Submit
-                            </button>
+
+                        {/* Buttons */}
+                        <div className="flex justify-end gap-3 mt-8">
                             <button
                                 type="button"
                                 onClick={() => setFormOpen(false)}
-                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200"
+                                className="px-6 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                             >
                                 Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Submit
                             </button>
                         </div>
                     </form>

@@ -37,8 +37,7 @@ exports.addbranch = async (req, res) => {
 exports.getAllBranch = async (req, res) => {
     try {
         const branches = await branch.find()
-            .populate('district')  
-            .populate('branchManager'); 
+            .populate('district')
 
         res.status(200).json({
             success: true,

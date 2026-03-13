@@ -115,7 +115,7 @@ exports.addAgent = async (req, res) => {
 
 exports.getAllAgent = async (req, res) => {
     try {
-        const agents = await agent.find();
+        const agents = await agent.find().populate("branchId");
         res.status(200).json( agents );
     }
     catch (error) {

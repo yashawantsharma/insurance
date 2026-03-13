@@ -27,10 +27,15 @@ const User = () => {
         name: "",
         email: "",
         phone: "",
-        password: "",
         role: "user",
         gender: "",
-        agentId: ""
+        agentId: "",
+        profileImage: null,
+        dateOfBirth: "",
+        fatherName: "",
+        motherName: "",
+        aadhaarNumber: "",
+        aadhaarImage: null
     })
 
     const [editinput, setEditInput] = useState({
@@ -46,6 +51,14 @@ const User = () => {
         fatchdata()
         fetchAgents()
         fatchTheme()
+        const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, [])
 
     useEffect(() => {
@@ -63,7 +76,7 @@ const User = () => {
             totalUsers,
             maleUsers,
             femaleUsers,
-            otherUsers
+           OtherUsers: otherUsers
         });
     };
 
@@ -117,23 +130,48 @@ const User = () => {
     const handlsubmit = async (e) => {
         e.preventDefault();
         const token = localStorage.getItem("token");
+        const formData = new FormData();
+        formData.append("name", input.name);
+        formData.append("email", input.email);
+        formData.append("phone", input.phone);
+        formData.append("role", input.role);
+        formData.append("gender", input.gender);
+        formData.append("dateOfBirth", input.dateOfBirth);
+        formData.append("fatherName", input.fatherName);
+        formData.append("motherName", input.motherName);
+        formData.append("aadhaarNumber", input.aadhaarNumber);
+        formData.append("agentId", input.agentId || "");
+        
+        if (input.profileImage) {
+            formData.append("profileImage", input.profileImage);
+        }
+        if (input.aadhaarImage) {
+            formData.append("aadhaarImage", input.aadhaarImage);
+        }
+
         try {
-            await axios.post("http://localhost:5050/user/", input, {
+            await axios.post("http://localhost:5050/user/", formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
+                    "Content-Type": "multipart/form-data",
                 },
             });
             alert("User added successfully!");
-            fatchdata()
+            fatchdata();
             setShowForm(false);
             setInput({
                 name: "",
                 email: "",
                 phone: "",
-                password: "",
                 role: "user",
                 gender: "",
-                agentId: ""
+                agentId: "",
+                profileImage: null,
+                dateOfBirth: "",
+                fatherName: "",
+                motherName: "",
+                aadhaarNumber: "",
+                aadhaarImage: null
             });
         } catch (error) {
             console.error("Error submitting form:", error);
@@ -188,14 +226,14 @@ const User = () => {
     }
 
     const filteredData = users.filter((item) => {
-        const matchesSearch = search === "" || 
+        const matchesSearch = search === "" ||
             (item.name && item.name.toLowerCase().includes(search.toLowerCase())) ||
             (item.email && item.email.toLowerCase().includes(search.toLowerCase())) ||
             (item.phone && item.phone.toString().includes(search));
-        
+
         const matchesGender = filterCriteria.gender === "" || item.gender === filterCriteria.gender;
         const matchesRole = filterCriteria.role === "" || item.role === filterCriteria.role;
-        
+
         return matchesSearch && matchesGender && matchesRole;
     });
 
@@ -354,9 +392,9 @@ const User = () => {
                                     </td>
                                     <td className="px-4 py-3">
                                         <span className={`px-2 py-1 rounded-full text-xs font-semibold 
-                                            ${x.gender === 'male' ? 'bg-blue-100 text-blue-800' : 
-                                              x.gender === 'female' ? 'bg-pink-100 text-pink-800' : 
-                                              'bg-purple-100 text-purple-800'}`}>
+                                            ${x.gender === 'male' ? 'bg-blue-100 text-blue-800' :
+                                                x.gender === 'female' ? 'bg-pink-100 text-pink-800' :
+                                                    'bg-purple-100 text-purple-800'}`}>
                                             {x.gender || 'N/A'}
                                         </span>
                                     </td>
@@ -410,7 +448,7 @@ const User = () => {
 
                 {view && selectedItem && (
                     <div
-                        className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                        className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50"
                         onClick={() => setView(false)}
                     >
                         <div
@@ -438,9 +476,9 @@ const User = () => {
                                 <div className="flex justify-between border-b pb-2">
                                     <span className="font-semibold">Gender:</span>
                                     <span className={`px-2 py-1 rounded-full text-xs font-semibold 
-                                        ${selectedItem?.gender === 'male' ? 'bg-blue-100 text-blue-800' : 
-                                          selectedItem?.gender === 'female' ? 'bg-pink-100 text-pink-800' : 
-                                          'bg-purple-100 text-purple-800'}`}>
+                                        ${selectedItem?.gender === 'male' ? 'bg-blue-100 text-blue-800' :
+                                            selectedItem?.gender === 'female' ? 'bg-pink-100 text-pink-800' :
+                                                'bg-purple-100 text-purple-800'}`}>
                                         {selectedItem?.gender}
                                     </span>
                                 </div>
@@ -476,7 +514,7 @@ const User = () => {
             </div>
 
             {isOpen && editinput && (
-                <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50`}>
+                <div className={`fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50`}>
                     <form onSubmit={handledit} className={`rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
                         <h2 className="text-2xl font-bold mb-6">Edit User</h2>
 
@@ -591,64 +629,136 @@ const User = () => {
             )}
 
             {showForm && (
-                <div className={`fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50`}>
-                    <form onSubmit={handlsubmit} className={`rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}>
-                        <h2 className="text-2xl font-bold mb-6">Add New User</h2>
+                <div className="fixed inset-0 bg-opacity-50 flex items-center justify-center p-4 z-50 overflow-y-auto">
+                    <form
+                        onSubmit={handlsubmit}
+                        className={`${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
+                            } w-full max-w-4xl p-8 rounded-2xl shadow-xl my-8`}
+                    >
+                        <h2 className="text-2xl font-semibold mb-6 text-center">Add New User</h2>
 
-                        <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                             <div>
-                                <label className="block text-sm font-medium mb-2">Name</label>
+                                <label className="block mb-1 font-medium">Name</label>
                                 <input
                                     type="text"
                                     value={input.name}
                                     onChange={(e) => setInput({ ...input, name: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Email</label>
+                                <label className="block mb-1 font-medium">Email</label>
                                 <input
                                     type="email"
                                     value={input.email}
                                     onChange={(e) => setInput({ ...input, email: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Phone</label>
+                                <label className="block mb-1 font-medium">Phone</label>
                                 <input
                                     type="number"
                                     value={input.phone}
                                     onChange={(e) => setInput({ ...input, phone: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Password</label>
+                                <label className="block mb-1 font-medium">fatherName</label>
                                 <input
-                                    type="password"
-                                    value={input.password}
-                                    onChange={(e) => setInput({ ...input, password: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    type="text"
+                                    value={input.fatherName}
+                                    onChange={(e) => setInput({ ...input, fatherName: e.target.value })}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
                                     required
                                 />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Gender</label>
+                                <label className="block mb-1 font-medium">motherName</label>
+                                <input
+                                    type="text"
+                                    value={input.motherName}
+                                    onChange={(e) => setInput({ ...input, motherName: e.target.value })}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-1 font-medium">aadhaarNumber</label>
+                                <input
+                                    type="number"
+                                    value={input.aadhaarNumber}
+                                    onChange={(e) => setInput({ ...input, aadhaarNumber: e.target.value })}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-1 font-medium">dateOfBirth</label>
+                                <input
+                                    type="date"
+                                    value={input.dateOfBirth}
+                                    onChange={(e) => setInput({ ...input, dateOfBirth: e.target.value })}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-1 font-medium">profileImage</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setInput({ ...input, profileImage: e.target.files[0] })}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-1 font-medium">aadhaarImage</label>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={(e) => setInput({ ...input, aadhaarImage: e.target.files[0] })}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark" ? "bg-gray-700 border-gray-600" : "bg-white border-gray-300"
+                                        }`}
+                                    required
+                                />
+                            </div>
+
+                            <div>
+                                <label className="block mb-1 font-medium">Gender</label>
                                 <select
                                     value={input.gender}
                                     onChange={(e) => setInput({ ...input, gender: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark"
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-black"
+                                        }`}
                                     required
                                 >
-                                    <option value="">Select gender</option>
+                                    <option value="">Select Gender</option>
                                     <option value="male">Male</option>
                                     <option value="female">Female</option>
                                     <option value="other">Other</option>
@@ -656,24 +766,29 @@ const User = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium mb-2">Role</label>
+                                <label className="block mb-1 font-medium">Role</label>
                                 <select
                                     value={input.role}
                                     onChange={(e) => setInput({ ...input, role: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark"
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-black"
+                                        }`}
                                     required
                                 >
                                     <option value="user">User</option>
-                                    <option value="admin">Admin</option>
                                 </select>
                             </div>
 
-                            <div>
-                                <label className="block text-sm font-medium mb-2">Assign Agent</label>
+                            <div className="md:col-span-2">
+                                <label className="block mb-1 font-medium">Assign Agent</label>
                                 <select
                                     value={input.agentId}
                                     onChange={(e) => setInput({ ...input, agentId: e.target.value })}
-                                    className={`w-full px-3 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-300"}`}
+                                    className={`w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none ${theme === "dark"
+                                        ? "bg-gray-700 border-gray-600 text-white"
+                                        : "bg-white border-gray-300 text-black"
+                                        }`}
                                 >
                                     <option value="">Select Agent (Optional)</option>
                                     {Array.isArray(agents) && agents.map((agent) => (
@@ -683,21 +798,22 @@ const User = () => {
                                     ))}
                                 </select>
                             </div>
+
                         </div>
 
-                        <div className="flex gap-3 mt-6">
-                            <button
-                                type="submit"
-                                className="flex-1 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
-                            >
-                                Submit
-                            </button>
+                        <div className="flex justify-end gap-3 mt-8">
                             <button
                                 type="button"
                                 onClick={() => setShowForm(false)}
-                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-lg transition duration-200"
+                                className="px-6 py-2 border rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition"
                             >
                                 Cancel
+                            </button>
+                            <button
+                                type="submit"
+                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                            >
+                                Submit
                             </button>
                         </div>
                     </form>

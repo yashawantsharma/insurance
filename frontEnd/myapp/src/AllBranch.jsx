@@ -48,6 +48,14 @@ const AllBranch = () => {
     fetchCountries();
     getTheme();
     getBranch();
+    const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
   }, []);
 
   useEffect(() => {
@@ -65,6 +73,7 @@ const AllBranch = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTheme(res.data.theme);
+      
     } catch (error) {
       console.error("Error fetching theme:", error);
     }
@@ -81,8 +90,11 @@ const AllBranch = () => {
       const res = await axios.get("http://localhost:5050/branch/findall", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setAllBranch(res.data);
-      setFilteredBranches(res.data);
+      setAllBranch(res.data.data);
+      // setFilteredBranches(res.data);
+      res.data.data.forEach((item) => {
+  setFilteredBranches(item.district?.name);
+});
     } catch (error) {
       alert("Error fetching Branch:", error);
     } finally {
@@ -138,13 +150,14 @@ const AllBranch = () => {
 
   const applyFilters = () => {
     let filtered = [...allBranch];
-
-    // Filter by selected city
+    console.log(selectedCityId);
+    console.log(filtered);
+    
+    
     if (selectedCityId) {
-      filtered = filtered.filter(item => item.district === selectedCityId);
+      filtered = filtered.filter(item => item.district._id === selectedCityId);
     }
 
-    // Filter by search term
     if (searchTerm) {
       const term = searchTerm.toLowerCase();
       filtered = filtered.filter(item => 
@@ -156,14 +169,12 @@ const AllBranch = () => {
       );
     }
 
-    // Filter by status
     if (filterStatus === "active") {
       filtered = filtered.filter(item => item.isActive === true);
     } else if (filterStatus === "inactive") {
       filtered = filtered.filter(item => item.isActive === false);
     }
 
-    // Filter by district
     if (filterDistrict) {
       filtered = filtered.filter(item => item.district === filterDistrict);
     }
@@ -607,7 +618,7 @@ const AllBranch = () => {
 
       {view && selectedItem && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50"
           onClick={() => setView(false)}
         >
           <div
@@ -685,7 +696,7 @@ const AllBranch = () => {
       )}
 
       {open && editData && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div className="fixed inset-0  bg-opacity-50 flex items-center justify-center p-4 z-50">
           <form onSubmit={handleEdit} className={`rounded-lg shadow-xl px-8 pt-6 pb-8 w-full max-w-md ${
             theme === "dark" ? "bg-gray-800" : "bg-white"
           }`}>

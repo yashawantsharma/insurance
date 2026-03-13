@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import ViewModal from "./modal/ViewModal";
 
 const AgentDashboard = () => {
 
@@ -7,7 +8,7 @@ const AgentDashboard = () => {
     const [agents, setAgents] = useState([])
     const [policies, setPolicies] = useState([])
     const [theme, setTheme] = useState("light");
-
+    const [showModal, setShowModal] = useState(false)
     useEffect(() => {
         fetchData()
         getTheme()
@@ -20,7 +21,7 @@ const AgentDashboard = () => {
             const agentRes = await axios.get("http://localhost:5050/agent/findall")
             const policyRes = await axios.get("http://localhost:5050/police/findall")
 
-            setBranches(branchRes.data)
+            setBranches(branchRes.data.data)
             setAgents(agentRes.data)
             setPolicies(policyRes.data)
 
@@ -29,6 +30,12 @@ const AgentDashboard = () => {
         }
     }
 
+
+    const handleModal = () => {
+
+        setShowModal(!showModal)
+
+    }
     const getTheme = async () => {
         const token = localStorage.getItem("token");
         if (!token) return;
@@ -54,7 +61,7 @@ const AgentDashboard = () => {
 
             <div className="grid grid-cols-4 gap-6">
 
-                <div className="bg-gradient-to-r from-blue-500  text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition">
+                <div onClick={handleModal} className="bg-gradient-to-from-blue-500 border   text-white p-6 rounded-2xl shadow-lg hover:scale-105 transition">
                     <p className="text-sm opacity-80">Total Branch</p>
                     <h2 className="text-4xl font-bold mt-2">
                         {branches.length}
@@ -172,8 +179,19 @@ const AgentDashboard = () => {
 
             </div>
 
+            {showModal &&
+                <ViewModal
+                    close={handleModal}
+                ></ViewModal>
+            }
         </div>
+
+
     );
 };
+
+
+
+
 
 export default AgentDashboard;

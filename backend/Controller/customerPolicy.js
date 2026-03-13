@@ -1,5 +1,5 @@
 const customerPolice=require("../Model/customerPolicy")
-const User = require("../model/userModel")
+const User = require("../Model/userModel")
 
 
 exports.addcustomer = async (req, res) => {
@@ -43,19 +43,26 @@ exports.addcustomer = async (req, res) => {
   }
 };
 
-
 exports.getAllcustomer = async (req, res) => {
     try {
-        const customerPolice = await customerPolice.find();
-        res.status(200).json( customerPolice );
-    }
-    catch (error) {
-        console.error("Error fetching customerPolice:", error);
-        res.status(500).json({ message: "Internal server error" });
+        const customerPolicies = await customerPolice.find()
+            .populate("user") 
+            .populate("policy");    
+        res.status(200).json({
+            success: true,
+            count: customerPolicies.length,
+            data: customerPolicies
+        });
+        
+    } catch (error) {
+        console.error("Error fetching customer policies:", error);
+        res.status(500).json({ 
+            success: false,
+            message: "Internal server error",
+            error: error.message 
+        });
     }
 };
-
-
 exports.deletecustomer = async (req, res) => {
     try {
         const {id} = req.params;
