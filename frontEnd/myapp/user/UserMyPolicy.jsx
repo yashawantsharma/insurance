@@ -3,9 +3,10 @@ import React, { useEffect, useState } from "react";
 import {
   FaRupeeSign, FaCalendarAlt, FaMoneyBillWave, FaCreditCard,
   FaWallet, FaUniversity, FaCheckCircle, FaClock, FaExclamationTriangle,
-  FaHistory, FaEye, FaDownload, FaPrint, FaTimes, FaFilter
+  FaHistory, FaDownload, FaPrint, FaTimes, FaFilter
 } from 'react-icons/fa';
 import { MdPayment } from 'react-icons/md';
+import api from "../src/api/apis";
 
 const UserMyPolicy = () => {
   const [data, setData] = useState([]);
@@ -13,7 +14,7 @@ const UserMyPolicy = () => {
   const [theme, setTheme] = useState("light");
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const [paymentHistory, setPaymentHistory] = useState([]);
+  const [paymentHistory, setPaymentHistory] = useState({});   // FIX: object keyed by policyId
   const [showHistoryModal, setShowHistoryModal] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
@@ -30,41 +31,74 @@ const UserMyPolicy = () => {
   useEffect(() => {
     fetchPolicies();
     getTheme();
+    const handleThemeChange = (event) => {
+      setTheme(event.detail);
+    };
+    window.addEventListener('themeChange', handleThemeChange);
+    return () => {
+      window.removeEventListener('themeChange', handleThemeChange);
+    };
   }, []);
 
   const fetchPolicies = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get(
-        "http://localhost:5050/CustomerPolicy/mypolicies",
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setData(res.data);
+      const res = await axios.get(`${api}/CustomerPolicy/mypolicies`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const policies = res.data || [];
+      setData(policies);
       setLoading(false);
+      // FIX: Saari policies ke payments ek saath fetch karo
+      await fetchAllPolicyPayments(policies);
     } catch (error) {
       console.error("Error fetching policies:", error);
       setLoading(false);
     }
   };
 
-  const fetchPaymentHistory = async (policyId) => {
+  // FIX: Ek baar mein saari policies ka payment history fetch karo
+  const fetchAllPolicyPayments = async (policies) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await axios.get(`${api}/payment/findall`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const allPayments = res.data || [];
+      const historyMap = {};
+
+      policies.forEach(policy => {
+        const policyId = String(policy.policy?._id || policy.policyId || "");
+        if (!policyId) return;
+        historyMap[policyId] = allPayments.filter(p => {
+          const pid = String(p.policyId?._id || p.policyId || "");
+          return pid === policyId;
+        });
+      });
+
+      setPaymentHistory(historyMap);
+    } catch (error) {
+      console.error("Error fetching all payments:", error);
+    }
+  };
+
+  // History modal ke liye single policy payments (refresh)
+  const fetchPaymentHistoryForPolicy = async (policyId) => {
     setHistoryLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/payment/findall", {
+      const res = await axios.get(`${api}/payment/findall`, {
         headers: { Authorization: `Bearer ${token}` }
       });
-      // console.log(res.data);
-
-      const policyPayments = res.data.filter(p => {
-        const paymentPolicyId = p.policyId?._id || p.policyId;
-        return paymentPolicyId === policyId;
+      const allPayments = res.data || [];
+      const pid = String(policyId);
+      const matched = allPayments.filter(p => {
+        const p2 = String(p.policyId?._id || p.policyId || "");
+        return p2 === pid;
       });
-
-      setPaymentHistory(policyPayments);
+      setPaymentHistory(prev => ({ ...prev, [pid]: matched }));
     } catch (error) {
       console.error("Error fetching payment history:", error);
-      setPaymentHistory([]);
     } finally {
       setHistoryLoading(false);
     }
@@ -73,23 +107,25 @@ const UserMyPolicy = () => {
   const getTheme = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTheme(res.data.theme);
+      if (res.data.theme === "dark") {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     } catch (error) {
       console.error("Error fetching theme:", error);
     }
   };
 
   const handleMakePayment = (policy) => {
-    const policyId = policy.policy?._id || policy.policyId;
+    const policyId = String(policy.policy?._id || policy.policyId || "");
     const premiumAmount = policy.premiumAmount || policy.policy?.installmentAmount;
-
-    const paidInstallments = paymentHistory.filter(p =>
-      (p.policyId?._id || p.policyId) === policyId && p.status === 'paid'
-    ).length;
-
+    const policyPayments = paymentHistory[policyId] || [];
+    const paidInstallments = policyPayments.filter(p => p.status === 'paid').length;
     const nextInstallmentNumber = paidInstallments + 1;
     const startDate = new Date(policy.startDate);
     const nextDueDate = new Date(startDate);
@@ -108,35 +144,40 @@ const UserMyPolicy = () => {
   };
 
   const handleViewHistory = async (policy) => {
-    const policyId = policy.policy?._id || policy.policyId;
+    const policyId = String(policy.policy?._id || policy.policyId || "");
     setSelectedPolicy(policy);
-    await fetchPaymentHistory(policyId);
+    await fetchPaymentHistoryForPolicy(policyId);
     setShowHistoryModal(true);
   };
 
   const submitPayment = async (e) => {
     e.preventDefault();
     const token = localStorage.getItem("token");
-
     try {
-      await axios.post("http://localhost:5050/payment/", paymentData, {
+      await axios.post(`${api}/payment/`, paymentData, {
         headers: { Authorization: `Bearer ${token}` }
       });
-
       alert("Payment successful!");
       setShowPaymentModal(false);
-
-      if (showHistoryModal && selectedPolicy) {
-        const policyId = selectedPolicy.policy?._id || selectedPolicy.policyId;
-        await fetchPaymentHistory(policyId);
-      }
-
-      fetchPolicies();
-
+      await fetchPolicies();
     } catch (error) {
       console.error("Error making payment:", error);
       alert(error.response?.data?.message || "Payment failed");
     }
+  };
+
+  // FIX: String conversion se exact match
+  const calculateInstallmentStats = (policy) => {
+    const policyId = String(policy.policy?._id || policy.policyId || "");
+    const policyPayments = paymentHistory[policyId] || [];
+    const paidInstallments = policyPayments.filter(p => p.status === 'paid').length;
+    const totalInstallments = policy.policy?.installmentDuration || 6;
+    const totalPaidAmount = policyPayments
+      .filter(p => p.status === 'paid')
+      .reduce((sum, p) => sum + (p.amount || 0), 0);
+    const progress = totalInstallments > 0 ? (paidInstallments / totalInstallments) * 100 : 0;
+    const remainingAmount = (policy.premiumAmount * totalInstallments) - totalPaidAmount;
+    return { paidInstallments, totalInstallments, totalPaidAmount, remainingAmount, progress };
   };
 
   const getStatusColor = (status) => {
@@ -174,41 +215,26 @@ const UserMyPolicy = () => {
     });
   };
 
-  const calculateInstallmentStats = (policy) => {
-    const policyId = policy.policy?._id || policy.policyId;
-    const policyPayments = paymentHistory.filter(p =>
-      (p.policyId?._id || p.policyId) === policyId
-    );
-
-    const paidInstallments = policyPayments.filter(p => p.status === 'paid').length;
-    const totalInstallments = policy.policy?.installmentDuration || 6;
-    const totalPaidAmount = policyPayments
-      .filter(p => p.status === 'paid')
-      .reduce((sum, p) => sum + (p.amount || 0), 0);
-    const progress = totalInstallments > 0 ? (paidInstallments / totalInstallments) * 100 : 0;
-    const remainingAmount = (policy.premiumAmount * totalInstallments) - totalPaidAmount;
-
-    return { paidInstallments, totalInstallments, totalPaidAmount, remainingAmount, progress };
+  const getSelectedPolicyHistory = () => {
+    if (!selectedPolicy) return [];
+    const policyId = String(selectedPolicy.policy?._id || selectedPolicy.policyId || "");
+    const history = paymentHistory[policyId] || [];
+    return filterStatus ? history.filter(p => p.status === filterStatus) : history;
   };
-
-  const filteredHistory = paymentHistory.filter(p =>
-    filterStatus ? p.status === filterStatus : true
-  );
 
   const downloadReceipt = (payment) => {
     const receipt = `
-      PAYMENT RECEIPT
-      ===============
-      Receipt No: ${payment._id?.slice(-8)}
-      Date: ${formatDate(payment.paymentDate || payment.dueDate)}
-      Policy: ${selectedPolicy?.policy?.fullName}
-      Installment: #${payment.installmentNumber}
-      Amount: ${formatCurrency(payment.amount)}
-      Status: ${payment.status}
-      Due Date: ${formatDate(payment.dueDate)}
-      ===============
+PAYMENT RECEIPT
+===============
+Receipt No: ${payment._id?.slice(-8)}
+Date: ${formatDate(payment.paymentDate || payment.dueDate)}
+Policy: ${selectedPolicy?.policy?.fullName}
+Installment: #${payment.installmentNumber}
+Amount: ${formatCurrency(payment.amount)}
+Status: ${payment.status}
+Due Date: ${formatDate(payment.dueDate)}
+===============
     `;
-
     const blob = new Blob([receipt], { type: 'text/plain' });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -227,7 +253,6 @@ const UserMyPolicy = () => {
             body { font-family: Arial; padding: 20px; }
             .receipt { max-width: 400px; margin: 0 auto; }
             h2 { color: #2563eb; }
-            .details { margin: 20px 0; }
             .row { display: flex; justify-content: space-between; margin: 10px 0; }
             .status-paid { color: #059669; }
             hr { border: 1px dashed #ccc; }
@@ -237,7 +262,7 @@ const UserMyPolicy = () => {
           <div class="receipt">
             <h2>PAYMENT RECEIPT</h2>
             <hr>
-            <div class="details">
+            <div>
               <div class="row"><strong>Receipt No:</strong> ${payment._id?.slice(-8)}</div>
               <div class="row"><strong>Date:</strong> ${formatDate(payment.paymentDate || payment.dueDate)}</div>
               <div class="row"><strong>Policy:</strong> ${selectedPolicy?.policy?.fullName}</div>
@@ -257,56 +282,43 @@ const UserMyPolicy = () => {
   };
 
   return (
-    <div className={`ml-64 mt-14 min-h-screen p-6 transition-all duration-300 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      }`}>
+    <div className={`ml-64 mt-14 min-h-screen p-6 transition-all duration-300 ${theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"}`}>
 
-      {/* Header */}
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             My Policies
           </h1>
-          <p className="text-sm text-gray-500 mt-1">
-            Manage your insurance policies and payments
-          </p>
+          <p className="text-sm text-gray-500 mt-1">Manage your insurance policies and payments</p>
         </div>
-        <div className="flex gap-2">
-          <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
-            Total: {data.length} Policies
-          </span>
-        </div>
+        <span className="px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm font-semibold">
+          Total: {data.length} Policies
+        </span>
       </div>
 
-      {/* Loading State */}
       {loading && (
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-16 w-16 border-4 border-blue-500 border-t-transparent"></div>
         </div>
       )}
 
-      {/* Policies Grid */}
       {!loading && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {data.map((item) => {
             const stats = calculateInstallmentStats(item);
-
             return (
               <div
                 key={item._id}
                 className={`group rounded-xl shadow-lg p-6 hover:shadow-2xl transform hover:scale-105 transition-all duration-300 border ${theme === "dark"
-                    ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
-                    : "bg-white border-gray-200 hover:bg-gray-50"
+                  ? "bg-gray-800 border-gray-700 hover:bg-gray-750"
+                  : "bg-white border-gray-200 hover:bg-gray-50"
                   }`}
               >
-                {/* Policy Header */}
                 <div className="flex justify-between items-start mb-3">
                   <h2 className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                     {item.policy?.fullName || "Insurance Policy"}
                   </h2>
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === 'active'
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                    }`}>
+                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}`}>
                     {item.status || 'Active'}
                   </span>
                 </div>
@@ -315,45 +327,32 @@ const UserMyPolicy = () => {
                   ID: {(item.policy?._id || item.policyId)?.slice(-8)}
                 </p>
 
-                {/* Progress Bar */}
                 <div className="mb-4">
                   <div className="flex justify-between text-xs mb-1">
                     <span>Progress</span>
-                    <span className="font-semibold">
-                      {stats.paidInstallments}/{stats.totalInstallments} Installments
-                    </span>
+                    <span className="font-semibold">{stats.paidInstallments}/{stats.totalInstallments} Installments</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2.5 overflow-hidden">
                     <div
-                      className="bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full transition-all duration-500 group-hover:from-blue-600 group-hover:to-purple-700"
+                      className="bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full transition-all duration-500"
                       style={{ width: `${stats.progress}%` }}
                     ></div>
                   </div>
                 </div>
 
-                {/* Policy Details */}
                 <div className="space-y-3">
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Premium</span>
-                    <span className="font-bold text-lg text-green-600">
-                      {formatCurrency(item.premiumAmount)}
-                    </span>
+                    <span className="font-bold text-lg text-green-600">{formatCurrency(item.premiumAmount)}</span>
                   </div>
-
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Paid Amount</span>
-                    <span className="font-bold text-blue-600">
-                      {formatCurrency(stats.totalPaidAmount)}
-                    </span>
+                    <span className="font-bold text-blue-600">{formatCurrency(stats.totalPaidAmount)}</span>
                   </div>
-
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Remaining</span>
-                    <span className="font-bold text-orange-600">
-                      {formatCurrency(stats.remainingAmount)}
-                    </span>
+                    <span className="font-bold text-orange-600">{formatCurrency(stats.remainingAmount)}</span>
                   </div>
-
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Start Date</span>
                     <span className="flex items-center gap-1">
@@ -361,7 +360,6 @@ const UserMyPolicy = () => {
                       {formatDate(item.startDate)}
                     </span>
                   </div>
-
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Next Installment</span>
                     <span className="text-red-500 font-medium flex items-center gap-1">
@@ -369,7 +367,6 @@ const UserMyPolicy = () => {
                       {formatDate(item.nextInstallmentDate)}
                     </span>
                   </div>
-
                   <div className="flex justify-between items-center">
                     <span className="text-gray-500">Payment Mode</span>
                     <span className="capitalize flex items-center gap-1">
@@ -382,7 +379,6 @@ const UserMyPolicy = () => {
                   </div>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex gap-3 mt-5">
                   <button
                     onClick={() => handleViewHistory(item)}
@@ -395,8 +391,8 @@ const UserMyPolicy = () => {
                     onClick={() => handleMakePayment(item)}
                     disabled={stats.paidInstallments >= stats.totalInstallments}
                     className={`flex-1 py-2.5 rounded-lg transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-2 shadow-md hover:shadow-xl ${stats.paidInstallments >= stats.totalInstallments
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
+                      ? 'bg-gray-400 cursor-not-allowed text-white'
+                      : 'bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700'
                       }`}
                   >
                     <MdPayment size={16} />
@@ -409,36 +405,30 @@ const UserMyPolicy = () => {
         </div>
       )}
 
-      {/* Empty State */}
       {data.length === 0 && !loading && (
         <div className="text-center py-20">
           <div className="flex flex-col items-center gap-4">
             <FaMoneyBillWave size={80} className="text-gray-400" />
             <h3 className="text-2xl font-semibold text-gray-500">No Policies Found</h3>
             <p className="text-gray-400">You haven't purchased any policies yet.</p>
-            <button className="px-8 py-3 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold">
-              Browse Policies
-            </button>
           </div>
         </div>
       )}
 
-      {/* Payment Modal */}
       {showPaymentModal && selectedPolicy && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+          className="fixed inset-0 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
           onClick={() => setShowPaymentModal(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 scale-100 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
+            className={`rounded-2xl shadow-2xl p-8 w-full max-w-md transform transition-all duration-300 scale-100 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}
           >
             <h2 className="text-2xl font-bold mb-6 text-center bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Make Payment
             </h2>
 
-            <div className="mb-6 p-4  dark:bg-gray-700 rounded-lg">
+            <div className="mb-6 p-4 border rounded-lg">
               <p className="font-semibold text-lg">{selectedPolicy.policy?.fullName}</p>
               <div className="flex justify-between mt-2 text-sm">
                 <span>Installment #{paymentData.installmentNumber}</span>
@@ -455,10 +445,7 @@ const UserMyPolicy = () => {
                     type="number"
                     value={paymentData.amount}
                     onChange={(e) => setPaymentData({ ...paymentData, amount: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark"
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-200 text-black"
-                      }`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-200 text-black"}`}
                     required
                   />
                 </div>
@@ -472,10 +459,7 @@ const UserMyPolicy = () => {
                     type="date"
                     value={paymentData.paymentDate}
                     onChange={(e) => setPaymentData({ ...paymentData, paymentDate: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark"
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-200 text-black"
-                      }`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-200 text-black"}`}
                     required
                   />
                 </div>
@@ -489,26 +473,19 @@ const UserMyPolicy = () => {
                     type="date"
                     value={paymentData.dueDate}
                     onChange={(e) => setPaymentData({ ...paymentData, dueDate: e.target.value })}
-                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark"
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white border-gray-200 text-black"
-                      }`}
+                    className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-200 text-black"}`}
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium mb-2">installmentNumber *</label>
-
+                <label className="block text-sm font-medium mb-2">Installment Number *</label>
                 <input
                   type="number"
                   value={paymentData.installmentNumber}
                   onChange={(e) => setPaymentData({ ...paymentData, installmentNumber: e.target.value })}
-                  className={`w-full pl-10 pr-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark"
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-200 text-black"
-                    }`}
+                  className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-200 text-black"}`}
                   required
                 />
               </div>
@@ -518,10 +495,7 @@ const UserMyPolicy = () => {
                 <select
                   value={paymentData.status}
                   onChange={(e) => setPaymentData({ ...paymentData, status: e.target.value })}
-                  className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark"
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-200 text-black"
-                    }`}
+                  className={`w-full px-4 py-3 rounded-xl border-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-300 ${theme === "dark" ? "bg-gray-700 border-gray-600 text-white" : "bg-white border-gray-200 text-black"}`}
                   required
                 >
                   <option value="paid">Paid</option>
@@ -550,18 +524,15 @@ const UserMyPolicy = () => {
         </div>
       )}
 
-      {/* Payment History Modal */}
       {showHistoryModal && selectedPolicy && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+          className="fixed inset-0  bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
           onClick={() => setShowHistoryModal(false)}
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className={`rounded-2xl shadow-2xl p-8 w-full max-w-3xl transform transition-all duration-300 scale-100 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"
-              }`}
+            className={`rounded-2xl shadow-2xl p-8 w-full max-w-3xl transform transition-all duration-300 scale-100 ${theme === "dark" ? "bg-gray-800 text-white" : "bg-white text-black"}`}
           >
-            {/* Modal Header */}
             <div className="flex justify-between items-center mb-6">
               <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
                 Payment History
@@ -574,8 +545,7 @@ const UserMyPolicy = () => {
               </button>
             </div>
 
-            {/* Policy Summary */}
-            <div className="mb-6 p-4  dark:bg-gray-700 rounded-lg">
+            <div className="mb-6 p-4 rounded-lg border">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-lg">{selectedPolicy.policy?.fullName}</p>
@@ -586,79 +556,49 @@ const UserMyPolicy = () => {
                 <div className="text-right">
                   <p className="text-sm text-gray-500">Total Paid</p>
                   <p className="text-xl font-bold text-green-600">
-                    {formatCurrency(paymentHistory.filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0))}
+                    {formatCurrency(getSelectedPolicyHistory().filter(p => p.status === 'paid').reduce((sum, p) => sum + (p.amount || 0), 0))}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* Status Filter */}
             {showFilters && (
               <div className="mb-4 flex gap-2">
-                <button
-                  onClick={() => setFilterStatus("")}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${filterStatus === ""
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                    }`}
-                >
-                  All
-                </button>
-                <button
-                  onClick={() => setFilterStatus("paid")}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${filterStatus === "paid"
-                      ? 'bg-green-500 text-white'
-                      : 'bg-green-100 text-green-800 hover:bg-green-200'
-                    }`}
-                >
-                  Paid
-                </button>
-                <button
-                  onClick={() => setFilterStatus("pending")}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${filterStatus === "pending"
-                      ? 'bg-yellow-500 text-white'
-                      : 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200'
-                    }`}
-                >
-                  Pending
-                </button>
-                <button
-                  onClick={() => setFilterStatus("overdue")}
-                  className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${filterStatus === "overdue"
-                      ? 'bg-red-500 text-white'
-                      : 'bg-red-100 text-red-800 hover:bg-red-200'
-                    }`}
-                >
-                  Overdue
-                </button>
+                {["", "paid", "pending", "overdue"].map(s => (
+                  <button
+                    key={s}
+                    onClick={() => setFilterStatus(s)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${filterStatus === s
+                      ? s === "" ? 'bg-blue-500 text-white' : s === "paid" ? 'bg-green-500 text-white' : s === "pending" ? 'bg-yellow-500 text-white' : 'bg-red-500 text-white'
+                      : s === "" ? 'bg-gray-200 text-gray-700' : s === "paid" ? 'bg-green-100 text-green-800' : s === "pending" ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'
+                      }`}
+                  >
+                    {s === "" ? "All" : s.charAt(0).toUpperCase() + s.slice(1)}
+                  </button>
+                ))}
               </div>
             )}
 
-            {/* History List */}
             {historyLoading ? (
               <div className="flex justify-center items-center h-40">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
-            ) : filteredHistory.length > 0 ? (
+            ) : getSelectedPolicyHistory().length > 0 ? (
               <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                {filteredHistory.map((payment, index) => (
+                {getSelectedPolicyHistory().map((payment, index) => (
                   <div
                     key={index}
-                    className={`p-4 rounded-lg border transform hover:scale-[1.02] transition-all duration-300 ${theme === "dark" ? "border-gray-700 hover:bg-gray-750" : "border-gray-200 hover:bg-gray-50"
-                      }`}
+                    className={`p-4 rounded-lg border transform hover:scale-[1.02] transition-all duration-300 ${theme === "dark" ? "border-gray-700 hover:bg-gray-750" : "border-gray-200 hover:bg-gray-50"}`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-2">
                           {getStatusIcon(payment.status)}
-                          <span className="font-semibold">
-                            Installment #{payment.installmentNumber}
-                          </span>
+                          <span className="font-semibold">Installment #{payment.installmentNumber}</span>
                           <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${getStatusColor(payment.status)}`}>
                             {payment.status}
                           </span>
                         </div>
-
                         <div className="grid grid-cols-2 gap-2 text-sm">
                           <div>
                             <span className="text-gray-500">Amount:</span>
@@ -676,8 +616,6 @@ const UserMyPolicy = () => {
                           )}
                         </div>
                       </div>
-
-                      {/* Action Buttons */}
                       <div className="flex gap-2 ml-4">
                         <button
                           onClick={() => printReceipt(payment)}
@@ -707,13 +645,9 @@ const UserMyPolicy = () => {
               </div>
             )}
 
-            {/* Modal Footer */}
             <div className="flex justify-end mt-6">
               <button
-                onClick={() => {
-                  setShowHistoryModal(false);
-                  setFilterStatus("");
-                }}
+                onClick={() => { setShowHistoryModal(false); setFilterStatus(""); }}
                 className="px-6 py-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center gap-2"
               >
                 <FaTimes size={14} />

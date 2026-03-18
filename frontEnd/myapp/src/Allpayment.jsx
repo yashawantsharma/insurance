@@ -7,6 +7,7 @@ import {
   FaWallet, FaCreditCard, FaUniversity, FaSearch, FaFileInvoice
 } from 'react-icons/fa';
 import { MdPayment } from 'react-icons/md';
+import api from "./api/apis"
 
 const Allpayment = () => {
   const [customers, setCustomers] = useState([]);
@@ -47,7 +48,7 @@ const Allpayment = () => {
   const fetchCustomers = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/user/findall",);
+      const res = await axios.get(`${api}/user/findall`,);
       setCustomers(res.data || []);
       setLoading(false);
     } catch (error) {
@@ -60,7 +61,7 @@ const Allpayment = () => {
     setHistoryLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/CustomerPolicy/findall", {
+      const res = await axios.get(`${api}/CustomerPolicy/findall`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const policies = res.data.data.filter(p => {
@@ -79,7 +80,7 @@ const Allpayment = () => {
   const fetchAllPayments = async (policies) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/payment/findall", {
+      const res = await axios.get(`${api}/payment/findall`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const paymentsByPolicy = {};
@@ -100,7 +101,7 @@ const Allpayment = () => {
   const getTheme = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTheme(res.data.theme);
@@ -143,7 +144,7 @@ const Allpayment = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     try {
-      await axios.post("http://localhost:5050/payment/", paymentData, {
+      await axios.post(`${api}/payment/`, paymentData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Payment successful!");
@@ -368,25 +369,25 @@ const Allpayment = () => {
                     </div>
 
                     <div className="grid grid-cols-2 gap-3 text-sm mb-4">
-                      <div className=" dark:bg-gray-700 p-2 rounded">
+                      <div className=" border p-2 rounded">
                         <span className="text-gray-500 block">Premium</span>
                         <span className="font-bold text-green-600">
                           {formatCurrency(policy.premiumAmount)}
                         </span>
                       </div>
-                      <div className=" dark:bg-gray-700 p-2 rounded">
+                      <div className=" border p-2 rounded">
                         <span className="text-gray-500 block">Paid</span>
                         <span className="font-bold text-blue-600">
                           {formatCurrency(stats.totalPaidAmount)}
                         </span>
                       </div>
-                      <div className=" dark:bg-gray-700 p-2 rounded">
+                      <div className=" border p-2 rounded">
                         <span className="text-gray-500 block">Remaining</span>
                         <span className="font-bold text-orange-600">
                           {formatCurrency(stats.remainingAmount)}
                         </span>
                       </div>
-                      <div className=" dark:bg-gray-700 p-2 rounded">
+                      <div className=" border p-2 rounded">
                         <span className="text-gray-500 block">Next Due</span>
                         <span className="font-bold text-red-500">
                           {formatDate(policy.nextInstallmentDate)}
@@ -432,7 +433,7 @@ const Allpayment = () => {
 
       {showPaymentModal && selectedPolicy && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+          className="fixed inset-0  bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
           onClick={() => setShowPaymentModal(false)}
         >
           <div
@@ -445,7 +446,7 @@ const Allpayment = () => {
               Make Payment
             </h2>
 
-            <div className="mb-6 p-4  dark:bg-gray-700 rounded-lg">
+            <div className="mb-6 p-4  border rounded-lg">
               <p className="font-semibold text-lg">{selectedPolicy.policy?.fullName}</p>
               <p className="text-sm text-gray-600 dark:text-gray-300">
                 Customer: {selectedCustomer?.name}
@@ -539,7 +540,7 @@ const Allpayment = () => {
                 <button
                   type="button"
                   onClick={() => setShowPaymentModal(false)}
-                  className="flex-1 py-3  text-white rounded-xl hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold"
+                  className="flex-1 py-3  rounded-xl hover:shadow-xl transform hover:scale-105 transition-all duration-300 font-semibold"
                 >
                   Cancel
                 </button>
@@ -551,7 +552,7 @@ const Allpayment = () => {
 
       {showHistoryModal && selectedPolicy && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
+          className="fixed inset-0 bg-opacity-60 flex items-center justify-center p-4 z-50 backdrop-blur-sm"
           onClick={() => setShowHistoryModal(false)}
         >
           <div
@@ -572,7 +573,7 @@ const Allpayment = () => {
               </button>
             </div>
 
-            <div className="mb-6 p-4  dark:bg-gray-700 rounded-lg">
+            <div className="mb-6 p-4 border rounded-lg">
               <div className="flex justify-between items-center">
                 <div>
                   <p className="font-semibold text-lg">{selectedPolicy.policy?.fullName}</p>

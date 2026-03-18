@@ -1,6 +1,7 @@
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import api from "./api/apis"
 
 const Reset = () => {
   const[theme,setTheme]=useState("")
@@ -21,7 +22,7 @@ const Reset = () => {
       
       const fetchTheme = async () => {
       const res = await axios.get(
-        "http://localhost:5050/user/theme",
+        `${api}/user/theme`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setTheme(res.data.theme); 
@@ -46,7 +47,7 @@ const Reset = () => {
             navigate("/login")
             return;
         }
-        const result=await axios.post("http://localhost:5050/user/reset",data)
+        const result=await axios.post(`${api}/user/reset`,data)
         alert("successfully")
         navigate("/profile")
     }

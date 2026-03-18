@@ -10,6 +10,7 @@ import {
   MdPolicy, MdDashboard
 } from 'react-icons/md';
 import { FaUsers, FaUserTie } from 'react-icons/fa';
+import api from "./api/apis"
 
 const LocationSelector = () => {
   const [countries, setCountries] = useState([]);
@@ -89,7 +90,7 @@ const LocationSelector = () => {
   }, [allBranch, searchTerm, filterStatus, filterManager, selectedDistrict]);
   const allagent=async()=>{
     try {
-       const res = await axios.get("http://localhost:5050/agent/findall");
+       const res = await axios.get(`${api}/agent/findall`);
       setData(res.data);
     } catch (error) {
       
@@ -98,7 +99,7 @@ const LocationSelector = () => {
 
   const fetchInitialData = async () => {
     try {
-      const res = await axios.get("http://localhost:5050/location/countries");
+      const res = await axios.get(`${api}/location/countries`);
       setCountries(res.data);
     } catch (err) {
       console.log(err);
@@ -110,7 +111,7 @@ const LocationSelector = () => {
     if (!token) return;
 
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTheme(res.data.theme);
@@ -128,7 +129,7 @@ const LocationSelector = () => {
 
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5050/branch/findall", {
+      const res = await axios.get(`${api}/branch/findall`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log("Branch data received:", res.data);
@@ -144,7 +145,7 @@ const LocationSelector = () => {
 
   const fetchAgents = async () => {
     try {
-      const res = await axios.get("http://localhost:5050/agent/findall");
+      const res = await axios.get(`${api}/agent/findall`);
       setAgent(res.data);
     } catch (error) {
       console.error("Error fetching agents:", error);
@@ -234,7 +235,7 @@ const LocationSelector = () => {
     setCities([]);
     setLocationSelected(false);
 
-    axios.post(`http://localhost:5050/Country/`, {
+    axios.post(`${api}/Country/`, {
       countryname: countryName
     });
 
@@ -243,7 +244,7 @@ const LocationSelector = () => {
     );
 
     if (selectedCountryObj) {
-      axios.get(`http://localhost:5050/location/states/${selectedCountryObj.isoCode}`)
+      axios.get(`${api}/location/states/${selectedCountryObj.isoCode}`)
         .then(res => setStates(res.data))
         .catch(err => console.log(err));
     }
@@ -257,7 +258,7 @@ const LocationSelector = () => {
     setLocationSelected(false);
 
     try {
-      await axios.post("http://localhost:5050/State", {
+      await axios.post(`${api}/State`, {
         name: stateName,
       });
 
@@ -272,7 +273,7 @@ const LocationSelector = () => {
       if (!selectedStateObj || !selectedCountryObj) return;
 
       const res = await axios.get(
-        `http://localhost:5050/location/cities/${selectedCountryObj.isoCode}/${selectedStateObj.isoCode}`
+        `${api}/location/cities/${selectedCountryObj.isoCode}/${selectedStateObj.isoCode}`
       );
       setCities(res.data);
     } catch (err) {
@@ -287,7 +288,7 @@ const LocationSelector = () => {
     setOpen(false);
 
     try {
-      const res = await axios.post("http://localhost:5050/District/", {
+      const res = await axios.post(`${api}/District/`, {
         name: districtname,
       });
       setDistrictId(res.data._id);
@@ -304,7 +305,7 @@ const LocationSelector = () => {
     };
 
     try {
-      await axios.post("http://localhost:5050/branch/", data);
+      await axios.post(`${api}/branch/`, data);
       alert("Branch added successfully");
       setShowForm(false);
       getBranch();
@@ -316,7 +317,7 @@ const LocationSelector = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this branch?")) {
       try {
-        await axios.delete(`http://localhost:5050/branch/delete/${id}`);
+        await axios.delete(`${api}/branch/delete/${id}`);
         alert("Record deleted successfully!");
         getBranch();
       } catch (error) {
@@ -327,7 +328,7 @@ const LocationSelector = () => {
 
   const handleView = async (x) => {
     try {
-      const res = await axios.get(`http://localhost:5050/branch/findone/${x._id}`);
+      const res = await axios.get(`${api}/branch/findone/${x._id}`);
       setSelectedItem(res.data);
       setView(true);
     } catch (error) {
@@ -338,7 +339,7 @@ const LocationSelector = () => {
   const handleEdit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5050/branch/update/${editData._id}`, editinput);
+      await axios.put(`${api}/branch/update/${editData._id}`, editinput);
       alert("Record updated successfully!");
       setIsOpen(false);
       getBranch();

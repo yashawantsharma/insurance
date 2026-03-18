@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md';
 import { FaUsers, FaRupeeSign, FaChartLine } from 'react-icons/fa';
+import api from "./api/apis"
 
 const Police = () => {
     const [data, setData] = useState([]);
@@ -107,9 +108,9 @@ const Police = () => {
                 isActive: true,
                 status: "active"
             };
-            await axios.post("http://localhost:5050/police/", submissionData);
+            await axios.post(`${api}/police/`, submissionData);
             alert("Data submitted successfully!");
-            const res = await axios.get("http://localhost:5050/police/findall");
+            const res = await axios.get(`${api}/police/findall`);
             setData(res.data);
             setFormOpen(false);
             setInput({
@@ -130,7 +131,7 @@ const Police = () => {
 
     const fatchall = async () => {
         try {
-            const res = await axios.get("http://localhost:5050/police/findall");
+            const res = await axios.get(`${api}/police/findall`);
             setData(res.data);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -144,7 +145,7 @@ const Police = () => {
             return;
         }
         try {
-            const res = await axios.get("http://localhost:5050/user/theme", {
+            const res = await axios.get(`${api}/user/theme`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTheme(res.data.theme);
@@ -157,7 +158,7 @@ const Police = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this record?")) {
             try {
-                await axios.delete(`http://localhost:5050/police/delete/${id}`);
+                await axios.delete(`${api}/police/delete/${id}`);
                 alert("Record deleted successfully!");
                 fatchall();
             } catch (error) {
@@ -168,7 +169,7 @@ const Police = () => {
 
     const handleView = async (x) => {
         try {
-            const res = await axios.get(`http://localhost:5050/police/findone/${x._id}`);
+            const res = await axios.get(`${api}/police/findone/${x._id}`);
             setSelectedItem(res.data);
             setView(true);
         }
@@ -196,7 +197,7 @@ const Police = () => {
     const handlEdit = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:5050/police/update/${editData._id}`, editinput);
+            await axios.put(`${api}/police/update/${editData._id}`, editinput);
             alert("Record updated successfully!");
             setIsOpen(false);
             fatchall();

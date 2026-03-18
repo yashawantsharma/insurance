@@ -7,6 +7,7 @@ import {
   FaWallet, FaCreditCard, FaUniversity, FaSearch, FaFileInvoice
 } from 'react-icons/fa';
 import { MdPayment } from 'react-icons/md';
+import api from "../src/api/apis"
 
 const Payment = () => {
   const [customers, setCustomers] = useState([]);
@@ -34,12 +35,20 @@ const Payment = () => {
   useEffect(() => {
     fetchCustomers();
     getTheme();
+      const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
   }, []);
 
   const fetchCustomers = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/user/oneuser", {
+      const res = await axios.get(`${api}/user/oneuser`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setCustomers(res.data.users || []);
@@ -54,7 +63,7 @@ const Payment = () => {
     setHistoryLoading(true);
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/CustomerPolicy/findall", {
+      const res = await axios.get(`${api}/CustomerPolicy/findall`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const policies = res.data.data.filter(p => {
@@ -73,7 +82,7 @@ const Payment = () => {
   const fetchAllPayments = async (policies) => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/payment/findall", {
+      const res = await axios.get(`${api}/payment/findall`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const paymentsByPolicy = {};
@@ -94,7 +103,7 @@ const Payment = () => {
   const getTheme = async () => {
     const token = localStorage.getItem("token");
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTheme(res.data.theme);
@@ -137,7 +146,7 @@ const Payment = () => {
     e.preventDefault();
     const token = localStorage.getItem("token");
     try {
-      await axios.post("http://localhost:5050/payment/", paymentData, {
+      await axios.post(`${api}/payment/`, paymentData, {
         headers: { Authorization: `Bearer ${token}` }
       });
       alert("Payment successful!");

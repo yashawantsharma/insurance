@@ -2,7 +2,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdEdit, MdLogout, MdLock, MdHome, MdSave, MdClose, MdPhone, MdEmail, MdPerson } from "react-icons/md";
-const api = import.meta.env.API_URL;
+// const api = import.meta.env.API_URL;
+import api from "./api/apis"
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -52,7 +53,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5050/user/theme/`,
+        `${api}/user/theme/`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -70,7 +71,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
       const res = await axios.get(
-        `http://localhost:5050/user/findone/${id}`,
+        `${api}/user/findone/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -104,7 +105,7 @@ export default function Profile() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5050/user/update/${id}`,
+        `${api}/user/update/${id}`,
         updatedata,
         {
           headers: {

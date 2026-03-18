@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { MdVisibility } from 'react-icons/md';
 import { FaUsers, FaGraduationCap, FaBriefcase, FaCalendarAlt, FaIdCard, FaEnvelope, FaPhone, FaFilter, FaTimes, FaSearch } from 'react-icons/fa';
+import api  from "../src/api/apis"
 
 const Allagent = () => {
   const [theme, setTheme] = useState("light");
@@ -25,10 +26,18 @@ const Allagent = () => {
   });
 
   useEffect(() => {
-    axios.get("http://localhost:5050/branch/findall")
+    axios.get(`${api}/branch/findall`)
       .then(res => setBranches(res.data.data))
     getTheme()
     fatchAgents()
+      const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
   }, [])
 
   useEffect(() => {
@@ -59,7 +68,7 @@ const Allagent = () => {
       return;
     }
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTheme(res.data.theme);
@@ -71,7 +80,7 @@ const Allagent = () => {
 
   const fatchAgents = async () => {
     try {
-      const res = await axios.get("http://localhost:5050/agent/findall");
+      const res = await axios.get(`${api}/agent/findall`);
       setData(res.data);
     } catch (error) {
       console.error("Error fetching agents:", error);
@@ -80,7 +89,7 @@ const Allagent = () => {
 
   const handleView = async (x) => {
     try {
-      const res = await axios.get(`http://localhost:5050/agent/findone/${x._id}`);
+      const res = await axios.get(`${api}/agent/findone/${x._id}`);
       setSelectedItem(res.data);
       setView(true);
     } catch (error) {

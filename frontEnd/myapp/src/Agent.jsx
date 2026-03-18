@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md';
 import { FaUsers, FaGraduationCap, FaBriefcase, FaCalendarAlt, FaIdCard, FaEnvelope, FaPhone } from 'react-icons/fa';
+import api from "./api/apis"
 
 const Agent = () => {
   const [showForm, setShowForm] = useState(false);
@@ -54,7 +55,7 @@ const Agent = () => {
   });
 
   useEffect(() => {
-    axios.get("http://localhost:5050/branch/findall")
+    axios.get(`${api}/branch/findall`)
       .then(res => setBranches(res.data.data))
     getTheme()
     fatchAgents()
@@ -96,7 +97,7 @@ const Agent = () => {
       return;
     }
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTheme(res.data.theme);
@@ -123,7 +124,7 @@ const Agent = () => {
     formData.append("duration", input.duration);
 
     try {
-      await axios.post("http://localhost:5050/agent/", formData)
+      await axios.post(`${api}/agent/`, formData)
       alert("Agent added successfully");
       setShowForm(false);
       setInput({
@@ -149,7 +150,7 @@ const Agent = () => {
 
   const fatchAgents = async () => {
     try {
-      const res = await axios.get("http://localhost:5050/agent/findall");
+      const res = await axios.get(`${api}/agent/findall`);
       setData(res.data);
     } catch (error) {
       console.error("Error fetching agents:", error);
@@ -158,7 +159,7 @@ const Agent = () => {
 
   const handleView = async (x) => {
     try {
-      const res = await axios.get(`http://localhost:5050/agent/findone/${x._id}`);
+      const res = await axios.get(`${api}/agent/findone/${x._id}`);
       setSelectedItem(res.data);
       setView(true);
     } catch (error) {
@@ -169,7 +170,7 @@ const Agent = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this agent?")) {
       try {
-        await axios.delete(`http://localhost:5050/agent/delete/${id}`);
+        await axios.delete(`${api}/agent/delete/${id}`);
         alert("Record deleted successfully!");
         fatchAgents();
       } catch (error) {
@@ -197,7 +198,7 @@ const Agent = () => {
   const handlEdit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5050/agent/update/${editData._id}`, editinput);
+      await axios.put(`${api}/agent/update/${editData._id}`, editinput);
       alert("Record updated successfully!");
       setIsOpen(false);
       fatchAgents();

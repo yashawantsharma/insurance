@@ -2,6 +2,7 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { MdDarkMode, MdLightMode, MdLogout, MdPerson } from "react-icons/md";
+import api from "./api/apis"
 
 const Header = () => {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -22,7 +23,7 @@ const Header = () => {
 
     try {
       const res = await axios.get(
-        "http://localhost:5050/user/theme",
+        `${api}/user/theme`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
@@ -50,7 +51,7 @@ const Header = () => {
 
     try {
       await axios.post(
-        "http://localhost:5050/user/updatetheme",
+        `${api}/user/updatetheme`,
         { theme: newTheme },
         {
           headers: { Authorization: `Bearer ${token}` }

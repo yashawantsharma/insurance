@@ -2,7 +2,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md';
 import { FaUsers, FaUserTie, FaMale, FaFemale, FaEnvelope, FaPhone } from 'react-icons/fa';
-
+import api from "./api/apis"
 const User = () => {
     const [data, setData] = useState([])
     const [agents, setAgents] = useState([])
@@ -82,7 +82,7 @@ const User = () => {
 
     const fatchdata = async () => {
         try {
-            const res = await axios.get("http://localhost:5050/user/findall")
+            const res = await axios.get(`${api}/user/findall`)
             setData(res.data)
         } catch (error) {
             console.error("Error fetching users:", error);
@@ -91,7 +91,7 @@ const User = () => {
 
     const fetchAgents = async () => {
         try {
-            const res = await axios.get("http://localhost:5050/agent/findall")
+            const res = await axios.get(`${api}/agent/findall`)
             setAgents(res.data)
         } catch (error) {
             console.error("Error fetching agents:", error);
@@ -104,7 +104,7 @@ const User = () => {
         try {
             const token = localStorage.getItem("token");
             const res = await axios.get(
-                `http://localhost:5050/user/theme/`,
+                `${api}/user/theme/`,
                 {
                     headers: {
                         Authorization: `Bearer ${token}`,
@@ -119,7 +119,7 @@ const User = () => {
 
     const handleView = async (x) => {
         try {
-            const res = await axios.get(`http://localhost:5050/user/findone/${x._id}`);
+            const res = await axios.get(`${api}/user/findone/${x._id}`);
             setSelectedItem(res.data);
             setView(true);
         } catch (error) {
@@ -150,7 +150,7 @@ const User = () => {
         }
 
         try {
-            await axios.post("http://localhost:5050/user/", formData, {
+            await axios.post(`${api}/user/`, formData, {
                 headers: {
                     Authorization: `Bearer ${token}`,
                     "Content-Type": "multipart/form-data",
@@ -182,7 +182,7 @@ const User = () => {
     const handledit = async (e) => {
         e.preventDefault();
         try {
-            await axios.put(`http://localhost:5050/user/update/${editData._id}`, editinput)
+            await axios.put(`${api}/user/update/${editData._id}`, editinput)
             alert("User updated successfully!")
             fatchdata()
             setIsOpen(false)
@@ -195,7 +195,7 @@ const User = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this user?")) {
             try {
-                await axios.delete(`http://localhost:5050/user/delete/${id}`)
+                await axios.delete(`${api}/user/delete/${id}`)
                 alert("User deleted successfully!")
                 fatchdata()
             } catch (error) {
@@ -354,9 +354,9 @@ const User = () => {
                 </div>
             )}
 
-            <div className="overflow-x-auto dark:bg-gray-800 rounded-xl shadow">
+            <div className="overflow-x-auto rounded-xl shadow">
                 <table className="min-w-full text-sm text-left">
-                    <thead className="dark:bg-gray-700">
+                    <thead className="dark:bg-gray-300">
                         <tr>
                             <th className="px-4 py-3">Name</th>
                             <th className="px-4 py-3">Email</th>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import ViewModal from "./modal/ViewModal";
+import api  from "../src/api/apis"
 
 const AgentDashboard = () => {
 
@@ -12,14 +13,22 @@ const AgentDashboard = () => {
     useEffect(() => {
         fetchData()
         getTheme()
+          const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, [])
 
     const fetchData = async () => {
         try {
 
-            const branchRes = await axios.get("http://localhost:5050/branch/findall")
-            const agentRes = await axios.get("http://localhost:5050/agent/findall")
-            const policyRes = await axios.get("http://localhost:5050/police/findall")
+            const branchRes = await axios.get(`${api}/branch/findall`)
+            const agentRes = await axios.get(`${api}/agent/findall`)
+            const policyRes = await axios.get(`${api}/police/findall`)
 
             setBranches(branchRes.data.data)
             setAgents(agentRes.data)
@@ -41,7 +50,7 @@ const AgentDashboard = () => {
         if (!token) return;
 
         try {
-            const res = await axios.get("http://localhost:5050/user/theme", {
+            const res = await axios.get(`${api}/user/theme`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTheme(res.data.theme);

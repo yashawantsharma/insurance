@@ -2,6 +2,7 @@ import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 import { MdDelete, MdEdit, MdVisibility } from 'react-icons/md'
 import { FaUsers, FaUserTie, FaMale, FaFemale, FaEnvelope, FaPhone, FaSearch, FaFilter, FaTimes, FaPlus } from 'react-icons/fa'
+import api  from "../src/api/apis"
 
 const Agentuser = () => {
     const [data, setData] = useState([])
@@ -34,6 +35,14 @@ const Agentuser = () => {
     useEffect(() => {
         fatchdata()
         fatchTheme()
+          const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, [])
 
     useEffect(() => {
@@ -58,7 +67,7 @@ const Agentuser = () => {
     const fatchdata = async () => {
         const token = localStorage.getItem("token")
         try {
-            const res = await axios.get("http://localhost:5050/user/oneuser", {
+            const res = await axios.get(`${api}/user/oneuser`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -72,7 +81,7 @@ const Agentuser = () => {
     const fatchTheme = async () => {
         try {
             const token = localStorage.getItem("token")
-            const res = await axios.get("http://localhost:5050/user/theme/", {
+            const res = await axios.get(`${api}/user/theme/`, {
                 headers: {
                     Authorization: `Bearer ${token}`
                 }
@@ -85,7 +94,7 @@ const Agentuser = () => {
 
     const handleView = async (x) => {
         try {
-            const res = await axios.get(`http://localhost:5050/user/findone/${x._id}`)
+            const res = await axios.get(`${api}/user/findone/${x._id}`)
             setSelectedItem(res.data)
             setView(true)
         } catch (error) {
@@ -96,7 +105,7 @@ const Agentuser = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this user?")) {
             try {
-                await axios.delete(`http://localhost:5050/user/delete/${id}`)
+                await axios.delete(`${api}/user/delete/${id}`)
                 alert("User deleted successfully!")
                 fatchdata()
             } catch (error) {
@@ -131,13 +140,13 @@ const Agentuser = () => {
         try {
             if (isEdit) {
                 // Update user
-                await axios.put(`http://localhost:5050/user/update/${editId}`, formData, {
+                await axios.put(`${api}/user/update/${editId}`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 alert("User updated successfully!")
             } else {
                 // Add new user
-                await axios.post("http://localhost:5050/user/", formData, {
+                await axios.post(`${api}/user/`, formData, {
                     headers: { Authorization: `Bearer ${token}` }
                 })
                 alert("User added successfully!")

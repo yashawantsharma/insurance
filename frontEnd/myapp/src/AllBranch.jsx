@@ -7,6 +7,7 @@ import {
   MdPerson, MdCheckCircle, MdCancel,
   MdRefresh
 } from 'react-icons/md';
+import api  from "./api/apis"
 
 const AllBranch = () => {
   const [countries, setCountries] = useState([]);
@@ -69,7 +70,7 @@ const AllBranch = () => {
       return;
     }
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTheme(res.data.theme);
@@ -87,7 +88,7 @@ const AllBranch = () => {
     }
     setLoading(true);
     try {
-      const res = await axios.get("http://localhost:5050/branch/findall", {
+      const res = await axios.get(`${api}/branch/findall`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setAllBranch(res.data.data);
@@ -104,7 +105,7 @@ const AllBranch = () => {
 
   const fetchCountries = async () => {
     try {
-      const res = await axios.get("http://localhost:5050/location/countri");
+      const res = await axios.get(`${api}/location/countri`);
       setCountries(res.data);
     } catch (error) {
       console.log(error);
@@ -121,7 +122,7 @@ const AllBranch = () => {
     if (!countryId) return;
 
     try {
-      const res = await axios.get(`http://localhost:5050/location/states`);
+      const res = await axios.get(`${api}/location/states`);
       setStates(res.data);
     } catch (error) {
       console.log(error);
@@ -136,7 +137,7 @@ const AllBranch = () => {
     if (!stateId) return;
 
     try {
-      const res = await axios.get(`http://localhost:5050/location/cities`);
+      const res = await axios.get(`${api}/location/cities`);
       setCities(res.data);
     } catch (error) {
       console.log(error);
@@ -194,7 +195,7 @@ const AllBranch = () => {
 
   const handleView = async (x) => {
     try {
-      const res = await axios.get(`http://localhost:5050/branch/findone/${x._id}`);
+      const res = await axios.get(`${api}/branch/findone/${x._id}`);
       setSelectedItem(res.data);
       setView(true);
     } catch (error) {
@@ -205,7 +206,7 @@ const AllBranch = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this branch?")) {
       try {
-        await axios.delete(`http://localhost:5050/branch/delete/${id}`);
+        await axios.delete(`${api}/branch/delete/${id}`);
         alert("Record deleted successfully!");
         getBranch();
       } catch (error) {
@@ -217,7 +218,7 @@ const AllBranch = () => {
   const handleEdit = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5050/branch/update/${editData._id}`, editinput);
+      await axios.put(`${api}/branch/update/${editData._id}`, editinput);
       alert("Record updated successfully!");
       setOpen(false);
       getBranch();

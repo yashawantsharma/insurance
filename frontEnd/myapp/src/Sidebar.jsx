@@ -6,6 +6,7 @@ import {
     FiBriefcase, FiCreditCard, FiLogOut, FiSun, FiMoon
 } from "react-icons/fi";
 import { MdDashboard, MdLocationOn, MdPolicy, MdPerson, MdGroup, MdBusiness, MdPayment } from "react-icons/md";
+import api from "./api/apis"
 
 const Sidebar = () => {
     const navigate = useNavigate();
@@ -27,7 +28,7 @@ const Sidebar = () => {
     const getTheme = async () => {
         const token = localStorage.getItem("token");
         try {
-            const res = await axios.get("http://localhost:5050/user/theme", {
+            const res = await axios.get(`${api}/user/theme`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTheme(res.data.theme);

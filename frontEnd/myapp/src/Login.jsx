@@ -1,7 +1,8 @@
 import axios from 'axios'
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-const api=import.meta.env.API_URL 
+// const api=import.meta.env.API_URL 
+import api from "./api/apis"
 
 
 
@@ -33,7 +34,7 @@ const Login = ({ switchToSignup }) => {
         if (Object.keys(validationErrors).length === 0) {
             try {
                 const response = await axios.post(
-                    `http://localhost:5050/user/login`,
+                    `${api}/user/login`,
                     loginInput
                 );
 

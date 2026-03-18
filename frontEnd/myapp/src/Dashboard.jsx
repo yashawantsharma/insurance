@@ -14,6 +14,7 @@ import {
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
   ResponsiveContainer, Area, AreaChart
 } from 'recharts';
+import api from "./api/apis"
 
 const Dashboard = () => {
   const [branches, setBranches] = useState([]);
@@ -83,10 +84,10 @@ const Dashboard = () => {
     setLoading(true);
     try {
       const [branchRes, agentRes, policyRes, customerRes] = await Promise.all([
-        axios.get("http://localhost:5050/branch/findall"),
-        axios.get("http://localhost:5050/agent/findall"),
-        axios.get("http://localhost:5050/police/findall"),
-        axios.get("http://localhost:5050/user/findall")
+        axios.get(`${api}/branch/findall`),
+        axios.get(`${api}/agent/findall`),
+        axios.get(`${api}/police/findall`),
+        axios.get(`${api}/user/findall`)
       ]);
 
       setBranches(branchRes.data.data || branchRes.data || []);
@@ -102,7 +103,7 @@ const Dashboard = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
     try {
-      const res = await axios.get("http://localhost:5050/user/theme", {
+      const res = await axios.get(`${api}/user/theme`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTheme(res.data.theme);

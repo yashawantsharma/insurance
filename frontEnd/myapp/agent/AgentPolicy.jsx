@@ -2,7 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { MdVisibility } from 'react-icons/md';
 import { FaRupeeSign, FaCalendarAlt, FaChartLine, FaFilter } from 'react-icons/fa';
-
+import api from "../src/api/apis"
 const AgentPolicy = () => {
     const [data, setData] = useState([]);
     const [theme, setTheme] = useState("light");
@@ -25,6 +25,14 @@ const AgentPolicy = () => {
     useEffect(() => {
         fatchall();
         getTheme();
+          const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, []);
 
     useEffect(() => {
@@ -47,7 +55,7 @@ const AgentPolicy = () => {
 
     const fatchall = async () => {
         try {
-            const res = await axios.get("http://localhost:5050/police/findall");
+            const res = await axios.get(`${api}/police/findall`);
             setData(res.data);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -61,7 +69,7 @@ const AgentPolicy = () => {
             return;
         }
         try {
-            const res = await axios.get("http://localhost:5050/user/theme", {
+            const res = await axios.get(`${api}/user/theme`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTheme(res.data.theme);
@@ -72,7 +80,7 @@ const AgentPolicy = () => {
 
     const handleView = async (x) => {
         try {
-            const res = await axios.get(`http://localhost:5050/police/findone/${x._id}`);
+            const res = await axios.get(`${api}/police/findone/${x._id}`);
             setSelectedItem(res.data);
             setView(true);
         } catch (error) {

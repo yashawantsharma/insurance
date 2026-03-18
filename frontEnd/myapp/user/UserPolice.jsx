@@ -2,6 +2,8 @@ import axios from 'axios';
 import React, { useEffect, useState } from 'react'
 import { MdVisibility } from 'react-icons/md';
 import { FaRupeeSign, FaCalendarAlt, FaFilter, FaTimes, FaSearch, FaMoneyBillWave, FaChartLine } from 'react-icons/fa';
+import api  from "../src/api/apis"
+
 
 const UserPolice = () => {
     const [data, setData] = useState([]);
@@ -36,6 +38,14 @@ const UserPolice = () => {
     useEffect(() => {
         fatchall();
         getTheme();
+         const handleThemeChange = (event) => {
+            setTheme(event.detail);
+            applyThemeToDocument(event.detail);
+        };
+        window.addEventListener('themeChange', handleThemeChange);
+        return () => {
+            window.removeEventListener('themeChange', handleThemeChange);
+        };
     }, [])
 
     useEffect(() => {
@@ -58,7 +68,7 @@ const UserPolice = () => {
 
     const fatchall = async () => {
         try {
-            const res = await axios.get("http://localhost:5050/police/findall");
+            const res = await axios.get(`${api}/police/findall`);
             setData(res.data);
         } catch (error) {
             console.error("Error fetching data:", error);
@@ -72,7 +82,7 @@ const UserPolice = () => {
             return;
         }
         try {
-            const res = await axios.get("http://localhost:5050/user/theme", {
+            const res = await axios.get(`${api}/user/theme`, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             setTheme(res.data.theme);
@@ -83,7 +93,7 @@ const UserPolice = () => {
 
     const handleView = async (x) => {
         try {
-            const res = await axios.get(`http://localhost:5050/police/findone/${x._id}`);
+            const res = await axios.get(`${api}/police/findone/${x._id}`);
             setSelectedItem(res.data);
             setView(true);
         } catch (error) {
@@ -95,7 +105,7 @@ const UserPolice = () => {
         const token = localStorage.getItem("token")
         e.preventDefault();
         try {
-            await axios.post("http://localhost:5050/CustomerPolicy/", input, {
+            await axios.post(`${api}/CustomerPolicy/`, input, {
                 headers: { Authorization: `Bearer ${token}` },
             });
             alert("Policy purchased successfully!");
@@ -508,7 +518,7 @@ const UserPolice = () => {
                             Purchase Policy
                         </h2>
 
-                        <div className="mb-4 p-4 bg-blue-50 dark:bg-gray-700 rounded-lg">
+                        <div className="mb-4 p-4 bg-blue-50 rounded-lg">
                             <p className="font-semibold">Selected Policy: {selectedData.fullName}</p>
                             <p className="text-sm text-gray-600 dark:text-gray-300 mt-1">
                                 Installment Amount: {formatCurrency(selectedData.installmentAmount)} •
